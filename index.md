@@ -31,6 +31,18 @@
 | 智园教育 | Android开发工程师 | 2016.5 - 2016.10 |
 | 腾讯科技（深圳）| Android开发工程师 | 2014.4 - 2016.5 |
 
+## 专业技能
+
+| --- | --- |
+| ⭐️⭐️⭐️⭐️⭐️| Java |
+| ⭐️⭐️⭐️⭐️⭐️| Android |
+| ⭐️⭐️⭐️⭐️  | Kotlin |
+| ⭐️⭐️⭐️⭐️  | Unit Test |
+| ⭐️⭐️⭐️⭐️  | Android Unit Test |
+| ⭐️⭐️⭐️    | Android UI Test |
+| ⭐️⭐️⭐️    | Agile Software |
+| ⭐️⭐️⭐️    | Project Manager |
+
 ## 项目经历
 
 ### OPPO敏捷转型
