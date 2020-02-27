@@ -1,5 +1,10 @@
+# 王鑫的简历
+
+
 
 ## 基本信息
+
+<div align='left'><img src="/Users/xinxwang/Desktop/WechatIMG2 copy.jpg" style="zoom:12%;" /></div>
 
 姓名 王鑫
 
@@ -13,7 +18,7 @@
 
 邮箱 xinyer0510@gmail.com
 
-微信 wangxinT_T  或 180926822334
+微信 wangxinT_T  或 18092682334
 
 ## 教育经历
 
@@ -33,15 +38,15 @@
 
 ## 专业技能
 
-| --- | --- |
-| ⭐️⭐️⭐️⭐️⭐️| Java |
-| ⭐️⭐️⭐️⭐️⭐️| Android |
-| ⭐️⭐️⭐️⭐️  | Kotlin |
-| ⭐️⭐️⭐️⭐️  | Unit Test |
+| ⭐️⭐️⭐️⭐️⭐️ | Java              |
+| ----- | ----------------- |
+| ⭐️⭐️⭐️⭐️⭐️ | Android           |
+| ⭐️⭐️⭐️⭐️  | Kotlin            |
+| ⭐️⭐️⭐️⭐️  | Unit Test         |
 | ⭐️⭐️⭐️⭐️  | Android Unit Test |
-| ⭐️⭐️⭐️    | Android UI Test |
-| ⭐️⭐️⭐️    | Agile Software |
-| ⭐️⭐️⭐️    | Project Manager |
+| ⭐️⭐️⭐️   | Android UI Test   |
+| ⭐️⭐️⭐️   | Agile Software    |
+| ⭐️⭐️    | Flutter           |
 
 ## 项目经历
 
