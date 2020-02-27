@@ -50,6 +50,16 @@
 
 ## 项目经历
 
+### 5G VR 企业互动营销
+
+⚡️担任Mobile Dev负责 VR头显设备端APP和同屏控制端APP开发
+
+- 基于Android系统开发支持WebVR协议的krpano编排VR场景的显示
+- 基于GeckoView浏览器内核，开发VR浏览器
+- 在不能使用Js bridge的情况下，采用Http Web Server和Web Socket的创新方式建立web和native的通信框架
+- 调研WebXR、OpenXR等VR协议
+- 适配华为VR Glass、Pico G2等VR设备
+
 ### OPPO敏捷转型
 
 🌟担任敏捷技术教练的角色，指导客户的3个开发团队进行敏捷转型，团队顺利完成预期的APP独立发布目标
