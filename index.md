@@ -1,13 +1,3 @@
-<ul>
-  {% for post in site.posts %}
-    <li>
-      <a href="{{ post.url }}">{{ post.title }}</a>
-    </li>
-  {% endfor %}
-</ul>
-
-----分割线----
-
 {% for tag in site.tags %}
   <h3>{{ tag[0] }}</h3>
   <ul>
