@@ -1,5 +1,4 @@
 ---
-layout: post
 title:  "APK大小优化之资源优化"
 tag: Android APK资源优化
 ---
