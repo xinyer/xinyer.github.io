@@ -1,3 +1,9 @@
+---
+layout: default
+title: Home
+nav_order: 1
+---
+
 ## WRITING, READING, TRANSLATE
 
 - Record technical drips, Find good articles, To improve myself and all 

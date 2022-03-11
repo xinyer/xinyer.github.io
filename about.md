@@ -1,10 +1,12 @@
-# About me
-
+---
+layout: default
+title: About me
+nav_order: 2
+---
 
 
 ## 基本信息
 
-<div align='left'><img src="/Users/xinxwang/Desktop/WechatIMG2 copy.jpg" style="zoom:12%;" /></div>
 
 姓名 王鑫
 
