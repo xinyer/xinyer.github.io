@@ -1,6 +1,6 @@
 ---
 layout: default
-title: space shooter
+title: Space Shooter
 parent: Games
 nav_order: 1
 ---
