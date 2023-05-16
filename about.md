@@ -1,7 +1,7 @@
 ---
 layout: default
 title: About me
-nav_order: 2
+nav_order: 4
 ---
 
 
