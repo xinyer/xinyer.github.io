@@ -2,7 +2,7 @@
 layout: default
 title: 使用 Baseline Profiles 改善 Android 应用性能
 parent: Android Performance
-nav_order: 2
+nav_order: 1
 ---
 
 ![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/1d5d6fae8c8c4f61ac85a6cf386e0d58~tplv-k3u1fbpfcp-watermark.image?)
