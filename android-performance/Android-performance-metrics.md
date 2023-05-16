@@ -5,7 +5,7 @@ parent: Android Performance
 nav_order: 4
 ---
 
-![July2019_Articles_01_Mobile-APM-tools.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/fce9e765337a492eb69b050edbbf8cb9~tplv-k3u1fbpfcp-watermark.image?)
+![July2019_Articles_01_Mobile-APM-tools.png](./assets/metrics.png)
 
 无论你是发布一个新的 Android 应用，还是希望提高现有应用的性能，你都可以使用 Android 应用性能指标来帮助你分析应用的性能情况。
 
@@ -45,7 +45,7 @@ Android 应用性能指标很重要，因为它们可以帮助开发者确定其
 
 Android使用初始显示时间（TTID）和完全显示时间（TTFD）指标来优化冷启动和温启动的应用程序。Android 运行时 (ART) 使用这些指标的数据来高效地预编译代码，以优化未来的启动过程。
 
-<img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/103747a98a3b4860ae4e494687a55f53~tplv-k3u1fbpfcp-watermark.image?" alt="startup types" width="50%" />
+<img src="./assets/metrics-startup.webp" alt="startup types" width="50%" />
 
 ### 2. 冻结帧（Frozen Frame）
 
@@ -84,7 +84,7 @@ Android使用初始显示时间（TTID）和完全显示时间（TTFD）指标�
 
 如果 Android 应用的界面线程处于阻塞状态的时间过长，会触发“应用无响应”(ANR) 错误。如果应用位于前台，系统会向用户显示一个对话框，如下所示。ANR 对话框会为用户提供强制退出应用的选项。
 
-<img src="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/589cda00f5e746bdbdf5cfab97481d03~tplv-k3u1fbpfcp-watermark.image?" alt="anr-example-framed.png" width="50%" />
+<img src="./assets/metrics-anr.png" width="50%" />
 
 ### 5. 崩溃（Crash）
 > 只要出现未处理的异常或信号导致的意外退出，Android应用就会崩溃。
@@ -99,14 +99,14 @@ Android使用初始显示时间（TTID）和完全显示时间（TTFD）指标�
 
 当应用崩溃时，Android 会终止应用的进程并显示一个对话框，告知用户应用已停止，如下图所示。
 
-<img src="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/6a977a22f26b4ab291c063d1c5a427ac~tplv-k3u1fbpfcp-watermark.image?" alt="crash-example-framed.png" width="50%" />
+<img src="./assets/metrics-crash.webp" alt="crash-example-framed.png" width="50%" />
 
 ### 6. 内存消耗（Memory Consumption）
 > 应用程序当前使用的物理内存的大小。
 
 **基线**
 
-<img src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b8ae434336e04c8bb41d1cec5208f8d5~tplv-k3u1fbpfcp-watermark.image?" alt="Untitled_2023-03-02_04-43-47.png" width="50%" />
+<img src="./assets/metrics-memory.webp" alt="Untitled_2023-03-02_04-43-47.png" width="50%" />
 
 如果 Android 应用程序消耗过多的内存，在运行时可能无法在内存中分配一个对象，就会抛出一个 `OutOfMemoryError`，导致应用突然崩溃，并显示应用程序 "已经停止 "的通知，创造一个糟糕的用户体验。
 
@@ -115,7 +115,7 @@ Android使用初始显示时间（TTID）和完全显示时间（TTFD）指标�
 
 **基线**
 
-<img src="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/c4475365c9da4d7c91276741c2481995~tplv-k3u1fbpfcp-watermark.image?" alt="android performance mertrics.png" width="50%" />
+<img src="./assets/metrics-cpu.webp" alt="android performance mertrics.png" width="50%" />
 
 ----
 
