@@ -1,9 +1,10 @@
 ---
-title:  "APK大小优化之资源优化"
-tag: Android APK资源优化
+layout: default
+title: APK 大小优化之资源优化
+parent: Android Performance
+nav_order: 6
 ---
 
-# APK大小优化之资源优化
 
 > [原文链接](https://jakewharton.com/smaller-apks-with-resource-optimization/)
 > 
