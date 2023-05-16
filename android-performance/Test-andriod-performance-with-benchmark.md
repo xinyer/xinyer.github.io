@@ -4,7 +4,7 @@ title: 使用 Macrobenchmark 测试 Android 应用性能
 parent: Android Performance
 nav_order: 2
 ---
-![main](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/34d069ecf9e3451a9298fabed2b06a44~tplv-k3u1fbpfcp-watermark.image?)
+![main](./assets/benchmark.webp)
 
 ## 什么是 Benchmark（基准测试）
 基准测试（benchmarking）是一种测量和评估软件性能指标的活动。你可以在特定时间（比如每次应用发布时）通过基准测试建立一个已知的性能水平，称为基准线。当系统的软件、硬件或更改代码等环境发生变化之后再进行一次基准测试以确定哪些变化对性能产生影响，从而有针对性的进行性能优化。
@@ -57,7 +57,7 @@ class ExampleStartupBenchmark {
 像运行单元测试一样，可以有以下几种方式运行：
 
 1. 右键点击运行按钮，选择要运行的测试类或方法
-![run](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/51b6f338b3f847629731e32748110b1e~tplv-k3u1fbpfcp-watermark.image?)
+![run](./assets/benchmark-run.png)
 2. 使用gradle命令运行所有的测试
 ```
 ./gradlew :macrobenchmark:connectedCheck
@@ -69,14 +69,14 @@ class ExampleStartupBenchmark {
 
 ## 查看测试结果
 运行成功之后，测试结果显示在结果面板中。
-![console](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/9e12a91ad8b140ffa4210dc0fc112be2~tplv-k3u1fbpfcp-watermark.image?)
+![console](./assets/benchmark-out.png)
 
 点击结果中的链接，打开CPU Profiler可以查看更多详细的信息。
-![cpu profiler](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f1a65e11d3f14a129223d5093e2076c4~tplv-k3u1fbpfcp-watermark.image?)
+![cpu profiler](./assets/benchmark-cpu-profiler.png)
 
 当然，除了直接显示到面板中，测试结果还会以JSON格式保存在文件中。这些文件位于`build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/`目录中。
 
-![json file](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/1750f0863afa4d59ac34781142ed6f0c~tplv-k3u1fbpfcp-watermark.image?)
+![json file](./assets/benchmark-outputs.png)
 
 JSON文件中包含运行基准测试的设备信息及实际运行的基准测试的信息，如下：
 ```json
@@ -159,11 +159,10 @@ JSON文件中包含运行基准测试的设备信息及实际运行的基准测�
 利用自定义跟踪事件进行应用插桩非常有用，这些事件会与跟踪报告的其余部分一起显示，有助于找出应用特有的问题。
 
 以下示例代码展示列表显示过程中自定义的创建视图和获取数据的事件：
-```kotlin
+```
 class MyAdapter : RecyclerView.Adapter<MyViewHolder>() {
-    override fun onCreateViewHolder(parent: ViewGroup,
-            viewType: Int): MyViewHolder {
-        trace("MyAdapter.onCreateViewHolder") {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
+        trace("MyAdapter.onCreateViewHolder") {
             MyViewHolder.newInstance(parent)
         }
     }

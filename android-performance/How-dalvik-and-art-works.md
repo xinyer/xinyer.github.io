@@ -12,7 +12,7 @@ Android Runtime 是 Android 生态系统中最核心的一部分，你们可能�
 
 当用户运行应用程序时，Android Runtime 把 .dex 文件中的字节码翻译成**机器码**——一组指令，机器可以直接理解并由 CPU 处理。
 
-![DEX](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/243f440e94c446d1b9058138ba46bb68~tplv-k3u1fbpfcp-watermark.image?)
+![DEX](./assets/art-dex.jpeg)
 
 有很多将字节码编译成机器码的策略，但是所有的策略都是权衡利弊的结果。从 Android 的发展历史去回顾可以让我们更好地理解这些策略。
 
@@ -37,7 +37,7 @@ ART 的工作方式和 Dalvik 完全不同，不再使用 Just in Time 编译，
 ## Profile Guided Optimization (PGO)
 配置文件引导编译是一种策略，可以在运行时不断提高 Android 应用程序的性能。默认情况下，应用程序使用**Just in Time 编译**策略进行编译，但是当 ART 检测到某些方法是“热”的，即它们运行频繁时，ART 可以预编译并缓存这些方法以达到最佳性能。
 
-![PGO](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/9867221bd3f8402db29900756f758659~tplv-k3u1fbpfcp-watermark.image?)
+![PGO](./assets/art-pgo.jpeg)
 
 这个策略使应用的关键部分提升到最佳性能，同时减少 RAM 的使用，而且不再影响应用的安装速度。因为对于大多数应用来说，只有10%～20%的代码被频繁使用。
 
@@ -46,14 +46,14 @@ ART 的工作方式和 Dalvik 完全不同，不再使用 Just in Time 编译，
 ## Cloud Profile
 云配置文件的主要思想是大多数人以非常相似的方式使用应用。因此，为了安装后立即提高性能，可以从已经使用过该应用的用户那里收集数据。聚合之后的数据用于为应用创建一个通用核心配置文件 (common core profile)。
 
-![cloud profile](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/924289bd9eff4a94b0a4594086d82356~tplv-k3u1fbpfcp-watermark.image?)
+![cloud profile](./assets/art-cloud-profile.jpeg)
 
 所以，当新用户安装应用时，此文件会与应用一起下载。 ART 使用它来预编译大多数用户经常运行的类和方法。这样新用户在下载应用后就能立即获得更好的性能。用户运行应用后，ART 将收集用户特定的配置文件数据并重新编译该用户经常使用的代码。最好的一点是，开发人员无需执行任何操作，这一切都发生在 Android Runtime 的内部。
 
 ## 总结
 Android Runtime 负责将作为 APK 的一部分的字节码编译为 CPU 可以直接理解的特定设备的机器码。
 
-![timeline.jpg](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/c2f793099d8a484a8f63696f4c707da6~tplv-k3u1fbpfcp-watermark.image?)
+![timeline.jpg](./assets/art-timeline.jpeg)
 
 第一个 Android Runtime 实现称为 **Dalvik**，它使用**即时编译（JIT）** 来优化 RAM 的使用。
 
