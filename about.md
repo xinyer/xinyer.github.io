@@ -71,7 +71,7 @@ nav_order: 4
 | 工作 | 1. 基于 Android 系统开发支持 WebVR 协议的 krpano 编排 VR 场景的显示<br/> 2. 基于 GeckoView 浏览器内核，开发VR浏览器<br/> 3. 在不能使用 Js bridge 的情况下，采用 Http Web Server 和 Web Socket 的创新方式建立 web 和 native 的通信框架<br/> 4. 调研 WebXR、OpenXR 等 VR 协议<br/> 5. 适配华为 VR Glass、Pico G2 等VR设备 |
 | 技术栈 | `Kotlin` `Android` `VR/XR` `Open Source WebView` |
 
-### 🌟 OPPO 敏捷转型咨询项目
+**OPPO 敏捷转型咨询项目**
 
 | --- | --- |
 | 职责 | 担任敏捷技术教练的角色，指导客户的3个开发团队进行敏捷转型，团队顺利完成预期的 APP 独立发布目标 |
@@ -79,15 +79,15 @@ nav_order: 4
 | 技术栈 | `Android` `Unit Test` `Agile` `Refactor` `CI/CD`|
 
 
-### 🌛 华为 Mateline
+**华为 Mateline**
 
 | --- | --- |
 | 职责 | 此项目是一个工单系统 APP，管理人员发布工单，使用人员接收并完成工单。 我担任 Android Dev，负责项目内产品需求开发和技术方案制定，保证项目顺利交付和客户满意 |
 | 工作 | 1. 解决module之间遗留代码的依赖问题，实现module的解耦，完成项目组件化转型的基础工作<br/> 2.工单、即时通讯、设置模块的产品开发工作<br/> 3. 离线提交队列、SharedPreference 整改、接入层数据SDK等技术方案制定和实现<br/> 4. 搭建 MockServer，解决团队中后端依赖的问题 |
-| 技术栈 | `Android` `Java` `Room` `组件化` ``|
+| 技术栈 | `Android` `Java` `Room` `组件化` |
 
 
-### 华为Welink
+**华为 Welink**
 
 | --- | --- |
 | 职责 | 担任 Android Dev，负责华为内部唯一办公软件的插件化框架方案实施及APP性能监控工具的技术方案与开发 |
@@ -95,7 +95,7 @@ nav_order: 4
 | 技术栈 | `插件化` `APM` `Android` |
 
 
-### 招商银行招银汇金
+**招银汇金**
 
 | --- | --- |
 | 职责 | 项目是招商银行唯一的黄金交易的 APP，作为 Tech Lead 参与项目技术方案制定、评审与开发，线上问题、机型兼容性问题修复，客户员工技术能力建设|
@@ -103,7 +103,7 @@ nav_order: 4
 | 技术栈 | `Android` `插件化` `Retrofit` `Jenkins` `Gradle` |
 
 
-### 智能钟表系统
+**智能钟表**
 
 | --- | --- |
 | 职责 | 作为软件产品负责人，主导智能硬件产品前后端架构设计，完成前端基础架构编码，实现核心模块功能；负责10人规模的软件团队管理工作 |
@@ -111,7 +111,7 @@ nav_order: 4
 | 技术栈 | `Android` `AOSP` `iot` `ruby on rails` `iOS` `agile` `unit test` `jenkins` |
 
 
-### Android QQ
+**Android QQ**
 
 | --- | --- |
 | 职责 | 作为Android开发工程师，参与Android QQ日常需求开发工作，主要负责音视频通话和通讯录模块 |
