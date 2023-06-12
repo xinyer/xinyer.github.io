@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>五子棋</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+
+    .board {
+      display: flex;
+      flex-wrap: wrap;
+      width: 630px;
+      height: 660px;
+      background-color: #8B4513;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+      margin-top: 20px;
+    }
+
+    .cell {
+      width: 40px;
+      height: 40px;
+      border: 1px solid #000;
+      position: relative;
+      background-color: #F4A460;
+    }
+
+    .piece {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #000;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
+    }
+
+    .player-piece {
+      background-color: #000;
+    }
+
+    .ai-piece {
+      background-color: #fff;
+    }
+
+    h1,
+    #startButton,
+    #board {
+      margin-top: 20px;
+    }
+
+    #startButton {
+      padding: 10px 20px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      background-color: #4CAF50;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 5px;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
+      background-image: linear-gradient(#5FBD62, #4CAF50);
+      background-size: 100% 200%;
+      transition: background-position 0.3s;
+    }
+
+    #startButton:hover {
+      background-position: 0% 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>五子棋</h1>
+  <button id="startButton" disabled>开始游戏</button>
+  <div class="board"></div>
+
+  <script>
+    // 创建棋盘
+    const boardSize = 15;
+    let board = [];
+    let currentPlayer = 1;
+    let gameEnded = false;
+
+    // 创建棋盘格子
+    const boardContainer = document.querySelector('.board');
+    for (let i = 0; i < boardSize; i++) {
+      board[i] = [];
+      for (let j = 0; j < boardSize; j++) {
+        board[i][j] = 0;
+
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.row = i;
+        cell.dataset.column = j;
+        cell.addEventListener('click', handleCellClick);
+        boardContainer.appendChild(cell);
+      }
+    }
+
+    // 处理格子点击事件
+    function handleCellClick(event) {
+      if (gameEnded) {
+        return;
+      }
+
+      const row = parseInt(event.target.dataset.row);
+      const column = parseInt(event.target.dataset.column);
+
+      // 检查当前位置是否为空
+      if (board[row][column] !== 0) {
+        return;
+      }
+
+      // 更新棋盘状态
+      board[row][column] = currentPlayer;
+
+      // 绘制棋子
+      drawPiece(row, column, currentPlayer === 1 ? 'player' : 'ai');
+
+      // 检查胜利条件
+      if (checkWin(row, column, currentPlayer)) {
+        endGame(currentPlayer === 1 ? '玩家胜利！' : 'AI胜利！');
+        return;
+      }
+
+      // 切换玩家
+      currentPlayer = getOpponentPlayer()
+
+      if (currentPlayer === 2) {
+        // AI下棋
+        makeAiMove();
+      }
+    }
+
+    // 绘制棋子
+    function drawPiece(row, column, player) {
+      const cell = document.querySelector(`.cell[data-row="${row}"][data-column="${column}"]`);
+      const piece = document.createElement('div');
+      piece.classList.add('piece');
+      piece.classList.add(player === 'player' ? 'player-piece' : 'ai-piece');
+      cell.appendChild(piece);
+    }
+
+    // AI下棋
+    function makeAiMove() {
+      const availableMoves = [];
+
+      // 遍历棋盘上的每个位置
+      for (let i = 0; i < boardSize; i++) {
+        for (let j = 0; j < boardSize; j++) {
+          if (board[i][j] === 0) {
+            // 尝试在该位置下棋
+            board[i][j] = currentPlayer;
+
+            // 判断是否形成三连
+            if (checkThreeInARow(i, j, currentPlayer)) {
+              // 形成三连，优先下在该位置
+              makeMove(i, j);
+              return;
+            }
+
+            // 计算对手的下一步最优位置
+            const opponentMove = calculateOpponentMove();
+
+            // 判断对手的下一步是否需要堵棋
+            if (opponentMove && shouldBlockOpponent(opponentMove.row, opponentMove.column)) {
+              // 需要堵对手的棋，优先下在堵棋位置
+              makeMove(i, j);
+              return;
+            }
+
+            // 记录可行的下棋位置
+            availableMoves.push({ row: i, column: j });
+
+            // 恢复棋盘状态
+            board[i][j] = 0;
+          }
+        }
+      }
+
+      if (availableMoves.length > 0) {
+        // 在活棋多的地方随机选择一个可行位置
+        const randomIndex = Math.floor(Math.random() * availableMoves.length);
+        const { row, column } = availableMoves[randomIndex];
+
+        // 下棋
+        makeMove(row, column);
+      }
+    }
+
+    // 判断是否形成三连
+    function checkThreeInARow(row, column, player) {
+      // 检查水平方向
+      let count = 1;
+      let i = row;
+      let j = column - 1;
+
+      while (j >= 0 && board[i][j] === player) {
+        count++;
+        j--;
+      }
+
+      j = column + 1;
+
+      while (j < boardSize && board[i][j] === player) {
+        count++;
+        j++;
+      }
+
+      if (count >= 3) {
+        return true;
+      }
+
+      // 检查垂直方向
+      count = 1;
+      i = row - 1;
+      j = column;
+
+      while (i >= 0 && board[i][j] === player) {
+        count++;
+        i--;
+      }
+
+      i = row + 1;
+
+      while (i < boardSize && board[i][j] === player) {
+        count++;
+        i++;
+      }
+
+      if (count >= 3) {
+        return true;
+      }
+
+      // 检查从左上到右下的斜线
+      count = 1;
+      i = row - 1;
+      j = column - 1;
+
+      while (i >= 0 && j >= 0 && board[i][j] === player) {
+        count++;
+        i--;
+        j--;
+      }
+
+      i = row + 1;
+      j = column + 1;
+
+      while (i < boardSize && j < boardSize && board[i][j] === player) {
+        count++;
+        i++;
+        j++;
+      }
+
+      if (count >= 3) {
+        return true;
+      }
+
+      // 检查从左下到右上的斜线
+      count = 1;
+      i = row + 1;
+      j = column - 1;
+
+      while (i < boardSize && j >= 0 && board[i][j] === player) {
+        count++;
+        i++;
+        j--;
+      }
+
+      i = row - 1;
+      j = column + 1;
+
+      while (i >= 0 && j < boardSize && board[i][j] === player) {
+        count++;
+        i--;
+        j++;
+      }
+
+      if (count >= 3) {
+        return true;
+      }
+
+      return false;
+    }
+
+    // 判断是否需要堵对手的棋
+    function shouldBlockOpponent(row, column) {
+      // 判断是否在对手的下一步形成三连
+      return checkThreeInARow(row, column, getOpponentPlayer());
+    }
+
+    // 计算对手的下一步最优位置
+    function calculateOpponentMove() {
+      // 这里可以使用一些启发式算法或者搜索算法来计算对手的最优位置
+      // 例如，可以考虑最简单的防守策略，让对手无法形成三连
+
+      // 这里只是一个示例，返回一个随机可行位置
+      const availableMoves = [];
+
+      for (let i = 0; i < boardSize; i++) {
+        for (let j = 0; j < boardSize; j++) {
+          if (board[i][j] === 0) {
+            availableMoves.push({ row: i, column: j });
+          }
+        }
+      }
+
+      if (availableMoves.length > 0) {
+        const randomIndex = Math.floor(Math.random() * availableMoves.length);
+        return availableMoves[randomIndex];
+      }
+
+      return null;
+    }
+
+    // 下棋
+    function makeMove(row, column) {
+      board[row][column] = currentPlayer;
+
+      // 绘制棋子
+      drawPiece(row, column, currentPlayer === 1 ? 'player' : 'ai');
+
+      // 检查胜利条件
+      if (checkWin(row, column, currentPlayer)) {
+        endGame(currentPlayer === 1 ? '玩家胜利！' : 'AI胜利！');
+        return;
+      }
+
+      // 切换当前玩家
+      currentPlayer = getOpponentPlayer();
+    }
+
+    // 获取对手玩家
+    function getOpponentPlayer() {
+      return currentPlayer === 1 ? 2 : 1;
+    }
+
+
+    // 检查胜利条件
+    function checkWin(row, column, player) {
+      // 在示例中，只检查水平和垂直方向的胜利条件
+
+      // 检查水平方向
+      let count = 1;
+      let i = row - 1;
+
+      while (i >= 0 && board[i][column] === player) {
+        count++;
+        i--;
+      }
+
+      i = row + 1;
+
+      while (i < boardSize && board[i][column] === player) {
+        count++;
+        i++;
+      }
+
+      if (count >= 5) {
+        return true;
+      }
+
+      // 检查垂直方向
+      count = 1;
+      let j = column - 1;
+
+      while (j >= 0 && board[row][j] === player) {
+        count++;
+        j--;
+      }
+
+      j = column + 1;
+
+      while (j < boardSize && board[row][j] === player) {
+        count++;
+        j++;
+      }
+
+      if (count >= 5) {
+        return true;
+      }
+
+      // 检查从左上到右下的斜线
+      count = 1;
+      i = row - 1;
+      j = column - 1;
+
+      while (i >= 0 && j >= 0 && board[i][j] === player) {
+        count++;
+        i--;
+        j--;
+      }
+
+      i = row + 1;
+      j = column + 1;
+
+      while (i < boardSize && j < boardSize && board[i][j] === player) {
+        count++;
+        i++;
+        j++;
+      }
+
+      if (count >= 5) {
+        return true;
+      }
+
+      // 检查从左下到右上的斜线
+      count = 1;
+      i = row + 1;
+      j = column - 1;
+
+      while (i < boardSize && j >= 0 && board[i][j] === player) {
+        count++;
+        i++;
+        j--;
+      }
+
+      i = row - 1;
+      j = column + 1;
+
+      while (i >= 0 && j < boardSize && board[i][j] === player) {
+        count++;
+        i--;
+        j++;
+      }
+
+      if (count >= 5) {
+        return true;
+      }
+
+      return false;
+    }
+
+    // 结束游戏
+    function endGame(message) {
+      gameEnded = true;
+      setTimeout(() => {
+        alert(message);
+      }, 100);
+
+      // 移除格子点击事件
+      const cells = document.querySelectorAll('.cell');
+      cells.forEach(cell => {
+        cell.removeEventListener('click', handleCellClick);
+      });
+
+      // 启用开始游戏按钮
+      const startButton = document.getElementById('startButton');
+      startButton.disabled = false;
+    }
+
+    // 开始游戏按钮点击事件
+    const startButton = document.getElementById('startButton');
+    startButton.addEventListener('click', () => {
+      // 重置游戏状态
+      board = [];
+      currentPlayer = 1;
+      gameEnded = false;
+
+      // 清除棋盘上的棋子
+      const pieces = document.querySelectorAll('.piece');
+      pieces.forEach(piece => {
+        piece.remove();
+      });
+
+      // 重置棋盘状态
+      for (let i = 0; i < boardSize; i++) {
+        board[i] = [];
+        for (let j = 0; j < boardSize; j++) {
+          board[i][j] = 0;
+        }
+      }
+
+      // 重新绑定格子点击事件
+      const cells = document.querySelectorAll('.cell');
+      cells.forEach(cell => {
+        cell.addEventListener('click', handleCellClick);
+      });
+
+      // 禁用开始游戏按钮
+      startButton.disabled = true;
+
+      if (currentPlayer === 2) {
+        // AI先下棋
+        makeAiMove();
+      }
+    });
+  </script>
+</body>
+
+</html>
