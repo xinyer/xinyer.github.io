@@ -317,6 +317,7 @@ decoder.release();
 Android 提供了一些内置的音频效果和音频处理功能，可以通过 AudioEffect 类和相关类来应用这些效果。以下是一些常见的音频效果和其应用示例：
 
 1. 均衡器（Equalizer）：用于调整音频信号的频率响应，改变音频的音色和平衡。
+
 ```java
 Equalizer equalizer = new Equalizer(priority, audioSessionId);
 equalizer.setEnabled(true);
@@ -328,6 +329,7 @@ equalizer.setBandLevel(band, gain);
 ```
 
 2. 回声消除（Acoustic Echo Cancellation）：用于消除音频信号中的回声，提高通话质量。
+
 ```java
 AcousticEchoCanceler echoCanceler = AcousticEchoCanceler.create(audioSessionId);
 if (AcousticEchoCanceler.isAvailable()) {
@@ -336,6 +338,7 @@ if (AcousticEchoCanceler.isAvailable()) {
 ```
 
 3. 噪声抑制（Noise Suppression）：用于降低音频信号中的背景噪声，提升音频质量。
+
 ```java
 NoiseSuppressor noiseSuppressor = NoiseSuppressor.create(audioSessionId);
 if (NoiseSuppressor.isAvailable()) {
@@ -344,6 +347,7 @@ if (NoiseSuppressor.isAvailable()) {
 ```
 
 4. 自动增益控制（Automatic Gain Control）：用于自动调整音频信号的增益，平衡音频的音量。
+
 ```java
 AutomaticGainControl automaticGainControl = AutomaticGainControl.create(audioSessionId);
 if (AutomaticGainControl.isAvailable()) {
