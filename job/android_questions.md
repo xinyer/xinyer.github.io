@@ -43,11 +43,10 @@ nav_order: 1
 - [35. 静态内部类为什么能保证单例？](#35-静态内部类为什么能保证单例)
 - [36. 为什么枚举的实现方式能保证单例？](#36-为什么枚举的实现方式能保证单例)
 - [37. 从 Android 系统层面说明 Activity 的启动过程？](#37-从-android-系统层面说明-activity-的启动过程)
-- [38. AMS WMS PMS 的依赖关系](#38-ams-wms-pms-的依赖关系)
-- [39. Android 中通过 binder 实现跨进程通信，在设计一个跨进程服务时，应该注意些什么？](#39-android-中通过-binder-实现跨进程通信在设计一个跨进程服务时应该注意些什么)
-- [40. Kotlin 相比 Java 的优点有哪些？](#40-kotlin-相比-java-的优点有哪些)
-- [41. Android 系统中 AMS WMS PMS 的依赖关系是什么样的？](#41-android-系统中-ams-wms-pms-的依赖关系是什么样的)
-- [42. 如何检测内存泄漏，LeakCanary 的实现原理是什么？](#42-如何检测内存泄漏leakcanary-的实现原理是什么)
+- [38. Android 中通过 binder 实现跨进程通信，在设计一个跨进程服务时，应该注意些什么？](#38-android-中通过-binder-实现跨进程通信在设计一个跨进程服务时应该注意些什么)
+- [39. Kotlin 相比 Java 的优点有哪些？](#39-kotlin-相比-java-的优点有哪些)
+- [40. Android 系统中 AMS WMS PMS 的依赖关系是什么样的？](#40-android-系统中-ams-wms-pms-的依赖关系是什么样的)
+- [41. 如何检测内存泄漏，LeakCanary 的实现原理是什么？](#41-如何检测内存泄漏leakcanary-的实现原理是什么)
 
 <!-- vscode-markdown-toc-config
 	numbering=true
@@ -799,9 +798,7 @@ public enum Singleton {
 
 需要注意的是，以上是一个简化的概述，实际的 Activity 启动过程非常复杂，并涉及多个系统组件的交互和协作。在整个过程中，涉及到权限验证、进程管理、资源加载、生命周期回调等多个环节，系统会根据不同的配置和设置进行相应的处理。
 
-## 38. AMS WMS PMS 的依赖关系
-
-## 39. Android 中通过 binder 实现跨进程通信，在设计一个跨进程服务时，应该注意些什么？
+## 38. Android 中通过 binder 实现跨进程通信，在设计一个跨进程服务时，应该注意些什么？
 
 在设计一个跨进程服务时，你应该注意以下几点：
 
@@ -821,7 +818,7 @@ public enum Singleton {
 
 以上是设计一个跨进程服务时应该注意的一些方面。当然，具体的设计还会受到具体应用场景和需求的影响，因此需要根据实际情况进行调整和优化。
 
-## 40. Kotlin 相比 Java 的优点有哪些？
+## 39. Kotlin 相比 Java 的优点有哪些？
 
 1. 更简洁：Kotlin 代码相对于 Java 更加简洁，可以通过更少的代码实现相同的功能。它引入了很多简化语法和特性，例如类型推断、空安全、扩展函数等，使得代码更易读、更易写。
 
@@ -839,7 +836,7 @@ public enum Singleton {
 
 这些是 Kotlin 相对于 Java 的一些优点，使得 Kotlin 成为一门受欢迎的编程语言，被广泛用于 Android 开发和其他领域的应用开发。
 
-## 41. Android 系统中 AMS WMS PMS 的依赖关系是什么样的？
+## 40. Android 系统中 AMS WMS PMS 的依赖关系是什么样的？
 
 在 Android 系统中，AMS (Activity Manager Service)，WMS (Window Manager Service)，PMS (Package Manager Service) 是三个核心服务，它们之间存在一定的依赖关系。
 
@@ -851,7 +848,7 @@ public enum Singleton {
 
 总结来说，AMS 是整个 Android 系统中应用程序管理的核心服务，它依赖于 WMS 来管理应用程序的窗口显示，同时也依赖于 PMS 来获取应用程序的相关信息。WMS 则负责窗口的管理和显示，与 AMS 紧密合作以实现应用程序的生命周期管理。PMS 则负责应用程序的安装、权限控制和相关信息的管理，与 AMS 和 WMS 在应用程序启动和管理时进行交互。这三个服务之间的协作保证了 Android 系统的正常运行和应用程序的管理。
 
-## 42. 如何检测内存泄漏，LeakCanary 的实现原理是什么？
+## 41. 如何检测内存泄漏，LeakCanary 的实现原理是什么？
 
 当一个 Activity 的 onDestory 方法被执行后，说明该 Activity 的生命周期已经走完，在下次 GC 发生时，该 Activity 对象应将被回收。
 
