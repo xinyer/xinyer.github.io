@@ -35,7 +35,7 @@ tags: [面试题，音频]
 
 ## 1. 请解释 Android Framework 中的音频架构。它由哪些组件组成，每个组件的作用是什么？
 
-![Android Audio 架构](./assets/android_audio_architecture.png)
+![Android Audio 架构](/assets/images/android_audio_architecture.png)
 
 Android Framework 中的音频架构由多个组件组成，每个组件承担着不同的角色和功能。以下是 Android Framework 中的主要音频组件及其作用：
 

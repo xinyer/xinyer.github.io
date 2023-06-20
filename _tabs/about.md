@@ -13,12 +13,6 @@ order: 4
 
 - 🏠 Xi'an Shaanxi China / 陕西西安
 
-### ☎️ Contact Me / 联系方式
-
-|---|---|---|
-| <a href="https://www.linkedin.com/in/xin-wang-47155775/"><img src="/assets/author/linkedin_logo.png" alt="linkedin" style="width:24px;height:24px;" /> LinkedIn </a> | <a href="mailto: xinyer0510@gmal.com"><img src="/assets/author/gmail_icon.webp" alt="gmail" style="width:24px;height:24px;" /> Gmail </a> | <a href="https://github.com/xinyer"><img src="/assets/author/github_logo.png" alt="github" style="width:24px;height:24px;" /> GitHub </a>|
-
-
 ### 🎓 Education / 教育经历
 
 | University 学校 | Major 专业 | Degree 学历 | Period 时间 |
