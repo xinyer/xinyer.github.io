@@ -564,8 +564,11 @@ fun main() {
 
 > 将抽象部分与它的实现部分分离，使它们都可以独立地变化。
 
-假设某个汽车厂商生产三种品牌的汽车：Big、Tiny 和 Boss，每种品牌又可以选择燃油、纯电和混合动力。如果用传统的继承来表示各个最终车型，一共有 3 个抽象类加 9 个最终子类。
+以下关于桥接模式的示例来自[廖雪峰的官方网站](https://www.liaoxuefeng.com/wiki/1252599548343744/1281319266943009)
 
+假设某个汽车厂商生产三种品牌的汽车：Big、Tiny 和 Boss，每种品牌又可以选择燃油、纯电和混合动力。如果用传统的继承来表示各个最终车型，一共有 3 个抽象类加 9 个最终子类：
+
+```
                    ┌───────┐
                    │  Car  │
                    └───────┘
@@ -586,6 +589,7 @@ fun main() {
     │ ┌───────────────┐│ ┌───────────────┐│ ┌───────────────┐
     └─│ BigHybridCar  │└─│ TinyHybridCar │└─│ BossHybridCar │
       └───────────────┘  └───────────────┘  └───────────────┘
+```
 
 如果要新增一个品牌，或者加一个新的引擎（比如核动力），那么子类的数量增长更快。
 
@@ -664,7 +668,7 @@ public class HybridEngine implements Engine {
 RefinedCar car = new BossCar(new HybridEngine());
 car.drive();
 ```
-
+```
        ┌───────────┐
        │    Car    │
        └───────────┘
@@ -683,14 +687,264 @@ car.drive();
                                 │ ┌──────────────┐
                                 └─│ HybridEngine │
                                   └──────────────┘
+```
 
 使用桥接模式的好处在于，如果要增加一种引擎，只需要针对 Engine 派生一个新的子类，如果要增加一个品牌，只需要针对 RefinedCar 派生一个子类，任何 RefinedCar 的子类都可以和任何一种 Engine 自由组合，即一辆汽车的两个维度：品牌和引擎都可以独立地变化。
 
-
 ## 2.3. 装饰器模式（Decorator Pattern）
+装饰器模式（Decorator Pattern）是一种结构型设计模式，它允许在不改变现有对象结构的情况下，动态地将行为附加到对象上。装饰器模式通过将对象包装在一个装饰器类中，以提供额外的功能或修改现有功能的方式来扩展对象的行为。
+
+装饰器模式遵循开放封闭原则，即可以添加新的装饰器类来扩展功能，而无需修改已有的代码。这使得装饰器模式具有灵活性和可扩展性，并且可以动态地组合多个装饰器，以实现各种组合效果。
+
+以下关于装饰器模式的示例来自[廖雪峰的官方网站](https://www.liaoxuefeng.com/wiki/1252599548343744/1281319302594594)
+
+在 Java 标准库中，`InputStream` 是抽象类，`FileInputStream`、`ServletInputStream`、`Socket.getInputStream()` 这些 `InputStream` 都是最终数据源。现在，如果要给不同的最终数据源增加缓冲功能、计算签名功能、加密解密功能，那么，3 个最终数据源、3 种功能一共需要 9 个子类。如果继续增加最终数据源，或者增加新功能，子类会爆炸式增长，这种设计方式显然是不可取的。Decorator 模式的目的就是把一个一个的附加功能，用 Decorator 的方式给一层一层地累加到原始数据源上，最终，通过组合获得我们想要的功能。
+
+例如：给 `FileInputStream` 增加缓冲和解压缩功能，用 Decorator 模式写出来如下：
+
+```java
+// 创建原始的数据源：
+InputStream fis = new FileInputStream("test.gz");
+// 增加缓冲功能：
+InputStream bis = new BufferedInputStream(fis);
+// 增加解压缩功能：
+InputStream gis = new GZIPInputStream(bis);
+```
+
+或者一次性写成这样：
+
+```java
+InputStream input = new GZIPInputStream( // 第二层装饰
+                        new BufferedInputStream( // 第一层装饰
+                            new FileInputStream("test.gz") // 核心功能
+                        ));
+```
+观察 `BufferedInputStream` 和 `GZIPInputStream`，它们实际上都是从 `FileInputStream` 继承的，这个 `FileInputStream` 就是一个抽象的 Decorator。我们用图把 Decorator 模式画出来如下：
+```
+             ┌───────────┐
+             │ Component │
+             └───────────┘
+                   ▲
+      ┌────────────┼─────────────────┐
+      │            │                 │
+┌───────────┐┌───────────┐     ┌───────────┐
+│ComponentA ││ComponentB │...  │ Decorator │
+└───────────┘└───────────┘     └───────────┘
+                                     ▲
+                              ┌──────┴──────┐
+                              │             │
+                        ┌───────────┐ ┌───────────┐
+                        │DecoratorA │ │DecoratorB │...
+                        └───────────┘ └───────────┘
+```
+
 ## 2.4. 组合模式（Composite Pattern）
+
+组合模式（Composite Pattern）是一种结构型设计模式，它允许我们将对象组合成树状结构，并以统一的方式处理单个对象和组合对象。组合模式通过定义一个共同的接口，使得单个对象和组合对象可以被一致地使用。
+
+组合模式包含以下几个关键角色：
+
+组件（Component）：定义组合对象和叶节点对象的共同接口，可以提供默认的实现或抽象方法。
+
+叶节点（Leaf）：表示组合中的叶节点对象，没有子节点。实现组件接口并提供具体实现。
+
+组合节点（Composite）：表示组合中的组合对象，可以包含子节点。实现组件接口并提供添加、移除和获取子节点的方法。
+
+通过使用组合模式，我们可以以一致的方式处理单个对象和组合对象，从而简化了客户端代码。组合模式适用于以下情况：
+
+当希望将对象组织成树状结构，并以统一的方式处理组合对象和单个对象时。
+
+当希望客户端能够忽略组合对象和单个对象之间的差异，统一调用它们的方法时。
+
+当希望添加新类型的组件而无需更改现有代码时，即遵循开放封闭原则。
+
+```kotlin
+// 组件接口
+interface Component {
+    fun operation()
+}
+
+// 叶节点
+class Leaf(private val name: String) : Component {
+    override fun operation() {
+        println("Leaf: $name")
+    }
+}
+
+// 组合节点
+class Composite(private val name: String) : Component {
+    private val children = mutableListOf<Component>()
+
+    fun add(component: Component) {
+        children.add(component)
+    }
+
+    fun remove(component: Component) {
+        children.remove(component)
+    }
+
+    override fun operation() {
+        println("Composite: $name")
+        for (child in children) {
+            child.operation()
+        }
+    }
+}
+
+// 客户端代码
+fun main() {
+    val root = Composite("Root")
+    val branch1 = Composite("Branch 1")
+    val branch2 = Composite("Branch 2")
+    val leaf1 = Leaf("Leaf 1")
+    val leaf2 = Leaf("Leaf 2")
+    val leaf3 = Leaf("Leaf 3")
+
+    root.add(branch1)
+    root.add(branch2)
+    branch1.add(leaf1)
+    branch2.add(leaf2)
+    branch2.add(leaf3)
+
+    root.operation()
+}
+```
+
 ## 2.5. 外观模式（Facade Pattern）
+外观模式（Facade Pattern）是一种结构型设计模式，它提供了一个统一的接口，用于访问子系统中的一组接口。外观模式隐藏了子系统的复杂性，为客户端提供了一个简单的接口，使得客户端与子系统之间的交互更加方便和易于使用。
+
+外观模式涉及以下几个关键角色：
+
+外观（Facade）：提供了一个简单的接口，客户端通过该接口与子系统进行交互。外观对象知道如何将客户端的请求委派给适当的子系统对象。
+
+子系统（Subsystem）：包含了一组相关的类或接口，负责实现子系统的功能。外观模式并不限制子系统的结构，可以是一个复杂的子系统，也可以是一组松散耦合的类。
+
+客户端（Client）：通过外观对象来与子系统进行交互，而不需要直接与子系统中的类进行交互。
+
+以下外观模式的示例来自[廖雪峰的官方网站](https://www.liaoxuefeng.com/wiki/1252599548343744/1281319346634785)
+
+以注册公司为例，假设注册公司需要三步：
+
+向工商局申请公司营业执照；
+在银行开设账户；
+在税务局开设纳税号。
+以下是三个系统的接口：
+
+```java
+// 工商注册：
+public class AdminOfIndustry {
+    public Company register(String name) {
+        ...
+    }
+}
+
+// 银行开户：
+public class Bank {
+    public String openAccount(String companyId) {
+        ...
+    }
+}
+
+// 纳税登记：
+public class Taxation {
+    public String applyTaxCode(String companyId) {
+        ...
+    }
+}
+```
+
+如果子系统比较复杂，并且客户对流程也不熟悉，那就把这些流程全部委托给中介：
+
+```java
+public class Facade {
+    public Company openCompany(String name) {
+        Company c = this.admin.register(name);
+        String bankAccount = this.bank.openAccount(c.getId());
+        c.setBankAccount(bankAccount);
+        String taxCode = this.taxation.applyTaxCode(c.getId());
+        c.setTaxCode(taxCode);
+        return c;
+    }
+}
+```
+这样，客户端只跟 Facade 打交道，一次完成公司注册的所有繁琐流程：
+
+`Company c = facade.openCompany("Facade Software Ltd.");`
+
+很多 Web 程序，内部有多个子系统提供服务，经常使用一个统一的 Facade 入口，例如一个 RestApiController，使得外部用户调用的时候，只关心 Facade 提供的接口，不用管内部到底是哪个子系统处理的。
+
+更复杂的 Web 程序，会有多个 Web 服务，这个时候，经常会使用一个统一的网关入口来自动转发到不同的 Web 服务，这种提供统一入口的网关就是 Gateway，它本质上也是一个 Facade，但可以附加一些用户认证、限流限速的额外服务。
+
 ## 2.6. 享元模式（Flyweight Pattern）
+
+享元模式（Flyweight Pattern）是一种结构型设计模式，旨在通过共享对象来有效地支持大量细粒度的对象。享元模式通过共享相同或相似的对象，减少了内存使用和对象创建的开销。享元（Flyweight）的核心思想很简单：如果一个对象实例**一经创建就不可变**，那么反复创建相同的实例就没有必要，直接向调用方返回一个共享的实例就行，这样即节省内存，又可以减少创建对象的过程，提高运行速度。
+
+享元模式涉及以下几个关键角色：
+
+1. 享元（Flyweight）：表示共享对象的接口，定义了对象的外部状态和内部状态的操作方法。
+
+2. 具体享元（Concrete Flyweight）：实现享元接口，并可共享的具体对象。
+
+3. 享元工厂（Flyweight Factory）：负责创建和管理享元对象，维护一个享元池（Flyweight Pool）来存储已创建的享元对象。
+
+下面是使用 Java 语言编写的享元模式示例代码：
+
+```java
+import java.util.HashMap;
+import java.util.Map;
+
+// 享元接口
+interface Shape {
+    void draw();
+}
+
+// 具体享元类
+class Circle implements Shape {
+    private String color;
+
+    public Circle(String color) {
+        this.color = color;
+    }
+
+    @Override
+    public void draw() {
+        System.out.println("Drawing a circle with color: " + color);
+    }
+}
+
+// 享元工厂类
+class ShapeFactory {
+    private static final Map<String, Shape> shapeCache = new HashMap<>();
+
+    public static Shape getCircle(String color) {
+        Circle circle = (Circle) shapeCache.get(color);
+
+        if (circle == null) {
+            circle = new Circle(color);
+            shapeCache.put(color, circle);
+        }
+
+        return circle;
+    }
+}
+
+// 客户端代码
+public class Main {
+    private static final String[] colors = {"Red", "Green", "Blue", "Yellow"};
+
+    public static void main(String[] args) {
+        for (int i = 0; i < 10; i++) {
+            Circle circle = (Circle) ShapeFactory.getCircle(getRandomColor());
+            circle.draw();
+        }
+    }
+
+    private static String getRandomColor() {
+        return colors[(int) (Math.random() * colors.length)];
+    }
+}
+```
+
 ## 2.7. 代理模式（Proxy Pattern）
 
 # 3. 行为型模式（Behavioral Patterns）:
