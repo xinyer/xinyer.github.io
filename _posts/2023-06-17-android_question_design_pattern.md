@@ -1,8 +1,8 @@
 ---
-title: Android 面试题 - 设计模式篇
+title: 设计模式
 date: 2023-06-17 11:11:00 +0800
-categories: [Android]
-tags: [面试题，设计模式]
+categories: [软件开发]
+tags: [设计模式]
 ---
 
 - [1. 创建型模型（Creational Patterns）](#1-创建型模型creational-patterns)
@@ -946,12 +946,404 @@ public class Main {
 ```
 
 ## 2.7. 代理模式（Proxy Pattern）
+代理模式是一种结构型设计模式，让你能够提供对象的替代品或其占位符。代理控制着对于原对象的访问，并允许在将请求提交给对象前后进行一些处理。
+
+以下示例来自[refactoringguru](https://refactoringguru.cn/design-patterns/proxy)
+
+为什么要控制对于某个对象的访问呢？举个例子：有这样一个消耗大量系统资源的巨型对象，你只是偶尔需要使用它，并非总是需要。
+
+- 代理模式解决的问题
+数据库查询有可能会非常缓慢。
+你可以实现延迟初始化：在实际有需要时再创建该对象。对象的所有客户端都要执行延迟初始代码。不幸的是，这很可能会带来很多重复代码。
+
+在理想情况下，我们希望将代码直接放入对象的类中，但这并非总是能实现：比如类可能是第三方封闭库的一部分。
+
+- 解决方案
+代理模式建议新建一个与原服务对象接口相同的代理类，然后更新应用以将代理对象传递给所有原始对象客户端。代理类接收到客户端请求后会创建实际的服务对象，并将所有工作委派给它。
+这有什么好处呢？如果需要在类的主要业务逻辑前后执行一些工作，你无需修改类就能完成这项工作。由于代理实现的接口与原类相同，因此你可将其传递给任何一个使用实际服务对象的客户端。
 
 # 3. 行为型模式（Behavioral Patterns）:
 ## 3.1. 模板方法模式（Template Method Pattern）
+
+模板方法模式（Template Method Pattern）是一种行为型设计模式，它定义了一个操作中的算法骨架，而将一些步骤延迟到子类中实现。模板方法模式使得子类可以在不改变算法结构的情况下，重新定义算法中的某些步骤。
+
+模板方法模式涉及以下几个关键角色：
+
+1. 抽象类（Abstract Class）：定义了一个模板方法，其中包含了算法的骨架和一些抽象方法，用于延迟到子类中实现。
+
+2. 具体类（Concrete Class）：继承抽象类，并实现其中的抽象方法，完成算法中的具体步骤。
+
+下面是使用 Kotlin 语言编写的模板方法模式示例代码：
+
+```kotlin
+// 抽象类
+abstract class Game {
+    abstract fun initialize()
+    abstract fun startPlay()
+    abstract fun endPlay()
+
+    // 模板方法，定义了算法的骨架
+    fun play() {
+        initialize()
+        startPlay()
+        endPlay()
+    }
+}
+
+// 具体类
+class Football : Game() {
+    override fun initialize() {
+        println("Football Game Initialized! Start playing.")
+    }
+
+    override fun startPlay() {
+        println("Football Game Started. Enjoy the game!")
+    }
+
+    override fun endPlay() {
+        println("Football Game Finished!")
+    }
+}
+
+class Basketball : Game() {
+    override fun initialize() {
+        println("Basketball Game Initialized! Start playing.")
+    }
+
+    override fun startPlay() {
+        println("Basketball Game Started. Enjoy the game!")
+    }
+
+    override fun endPlay() {
+        println("Basketball Game Finished!")
+    }
+}
+
+// 客户端代码
+fun main() {
+    val footballGame = Football()
+    footballGame.play()
+
+    println()
+
+    val basketballGame = Basketball()
+    basketballGame.play()
+}
+```
+
+在上述示例中，我们定义了抽象类 `Game`，其中包含了模板方法 `play()`，以及抽象方法 `initialize()`、`startPlay()` 和 `endPlay()`。
+
+然后我们创建了具体类 `Football` 和 `Basketball`，它们继承自抽象类并实现了其中的抽象方法。
+
+在客户端代码中，我们创建了一个足球游戏对象 `footballGame` 和一个篮球游戏对象 `basketballGame`，并调用它们的 `play()` 方法。模板方法 `play()` 中定义了算法的骨架，包括了初始化、开始游戏和结束游戏的步骤，具体的实现则由子类提供。
+
+运行上述代码将输出：
+
+```
+Football Game Initialized! Start playing.
+Football Game Started. Enjoy the game!
+Football Game Finished!
+
+Basketball Game Initialized! Start playing.
+Basketball Game Started. Enjoy the game!
+Basketball Game Finished!
+```
+
+通过使用模板方法模式，我们可以定义算法的骨架，并将一些具体步骤延迟到子类中实现。这样，不同的子类可以根据自己的需求来定制算法。
+
+可见，模板方法的核心思想是：父类定义骨架，子类实现某些细节。
+
+为了防止子类重写父类的骨架方法，可以在父类中对骨架方法使用 final。对于需要子类实现的抽象方法，一般声明为 protected，使得这些方法对外部客户端不可见。
+
 ## 3.2. 策略模式（Strategy Pattern）
+
+策略模式（Strategy Pattern）是一种行为型设计模式，它定义了一系列算法，将每个算法封装成独立的对象，并使它们可以互相替换。策略模式使得算法的变化独立于使用它的客户端。
+
+策略模式涉及以下几个关键角色：
+
+1. 策略（Strategy）：定义了算法的接口，具体的策略类实现该接口，提供了不同的算法实现。
+
+2. 具体策略（Concrete Strategy）：实现了策略接口，提供了具体的算法实现。
+
+3. 上下文（Context）：持有一个策略对象的引用，并在需要的时候调用策略的算法。
+
+下面是使用 Kotlin 语言编写的策略模式示例代码：
+
+```kotlin
+// 策略接口
+interface SortStrategy {
+    fun sort(list: List<Int>): List<Int>
+}
+
+// 具体策略：冒泡排序
+class BubbleSortStrategy : SortStrategy {
+    override fun sort(list: List<Int>): List<Int> {
+        println("Using Bubble Sort")
+        val sortedList = list.toMutableList()
+        val n = sortedList.size
+        for (i in 0 until n - 1) {
+            for (j in 0 until n - i - 1) {
+                if (sortedList[j] > sortedList[j + 1]) {
+                    val temp = sortedList[j]
+                    sortedList[j] = sortedList[j + 1]
+                    sortedList[j + 1] = temp
+                }
+            }
+        }
+        return sortedList
+    }
+}
+
+// 具体策略：快速排序
+class QuickSortStrategy : SortStrategy {
+    override fun sort(list: List<Int>): List<Int> {
+        println("Using Quick Sort")
+        if (list.size <= 1) return list
+        val pivot = list[list.size / 2]
+        val equal = list.filter { it == pivot }
+        val less = list.filter { it < pivot }
+        val greater = list.filter { it > pivot }
+        return sort(less) + equal + sort(greater)
+    }
+}
+
+// 上下文
+class SortContext(private val strategy: SortStrategy) {
+    fun sortList(list: List<Int>): List<Int> {
+        return strategy.sort(list)
+    }
+}
+
+// 客户端代码
+fun main() {
+    val list = listOf(5, 2, 8, 4, 1)
+
+    val bubbleSortStrategy = BubbleSortStrategy()
+    val bubbleSortContext = SortContext(bubbleSortStrategy)
+    val bubbleSortedList = bubbleSortContext.sortList(list)
+    println("Bubble Sorted List: $bubbleSortedList")
+
+    println()
+
+    val quickSortStrategy = QuickSortStrategy()
+    val quickSortContext = SortContext(quickSortStrategy)
+    val quickSortedList = quickSortContext.sortList(list)
+    println("Quick Sorted List: $quickSortedList")
+}
+```
+
+在上述示例中，我们定义了一个策略接口 `SortStrategy`，其中包含了一个 `sort()` 方法用于排序。
+
+然后我们创建了两个具体策略类 `BubbleSortStrategy` 和 `QuickSortStrategy`，
+
+它们分别实现了 `SortStrategy` 接口，并提供了不同的排序算法实现。
+
+接下来，我们创建了上下文类 `SortContext`，它持有一个策略对象的引用，并在需要时调用策略的 `sort()` 方法。
+
+在客户端代码中，我们创建了一个整数列表 `list`，然后使用冒泡排序策略和快速排序策略对列表进行排序。我们通过创建相应的策略对象，并将其传递给上下文类的构造函数，然后调用 `sortList()` 方法进行排序，并打印排序后的结果。
+
+运行上述代码将输出：
+
+```
+Using Bubble Sort
+Bubble Sorted List: [1, 2, 4, 5, 8]
+
+Using Quick Sort
+Quick Sorted List: [1, 2, 4, 5, 8]
+```
+
+通过使用策略模式，我们可以轻松地在运行时选择不同的算法，使得算法的变化独立于客户端的使用。
+
 ## 3.3. 观察者模式（Observer Pattern）
+
+观察者模式（Observer Pattern）是一种行为型设计模式，它定义了一种一对多的依赖关系，让多个观察者对象同时监听某一个主题对象的状态变化。当主题对象发生变化时，它的所有观察者都会收到通知并进行相应的更新。
+
+观察者模式涉及以下几个关键角色：
+
+1. 主题（Subject）：也称为被观察者或可观察者，它维护一份观察者列表并提供注册和删除观察者的方法，以及通知观察者的方法。
+
+2. 观察者（Observer）：定义了一个更新的接口，用于接收主题的通知并进行相应的更新操作。
+
+3. 具体主题（Concrete Subject）：继承或实现主题接口，具体主题对象通常在自身状态发生变化时，通知所有注册的观察者。
+
+4. 具体观察者（Concrete Observer）：继承或实现观察者接口，在接收到主题的通知时进行相应的更新操作。
+
+下面是使用 Kotlin 语言编写的观察者模式示例代码：
+
+```kotlin
+// 主题接口
+interface Subject {
+    fun registerObserver(observer: Observer)
+    fun removeObserver(observer: Observer)
+    fun notifyObservers()
+}
+
+// 观察者接口
+interface Observer {
+    fun update(subject: Subject)
+}
+
+// 具体主题
+class WeatherData : Subject {
+    private val observers: MutableList<Observer> = mutableListOf()
+    private var temperature: Float = 0.0f
+
+    fun setTemperature(temperature: Float) {
+        this.temperature = temperature
+        notifyObservers()
+    }
+
+    override fun registerObserver(observer: Observer) {
+        observers.add(observer)
+    }
+
+    override fun removeObserver(observer: Observer) {
+        observers.remove(observer)
+    }
+
+    override fun notifyObservers() {
+        for (observer in observers) {
+            observer.update(this)
+        }
+    }
+
+    fun getTemperature(): Float {
+        return temperature
+    }
+}
+
+// 具体观察者
+class Display : Observer {
+    override fun update(subject: Subject) {
+        if (subject is WeatherData) {
+            val temperature = subject.getTemperature()
+            println("Temperature updated: $temperature")
+            // 具体的更新操作
+        }
+    }
+}
+
+// 客户端代码
+fun main() {
+    val weatherData = WeatherData()
+    val display = Display()
+
+    weatherData.registerObserver(display)
+
+    // 模拟温度变化
+    weatherData.setTemperature(25.0f)
+    weatherData.setTemperature(30.0f)
+
+    weatherData.removeObserver(display)
+
+    // 不再通知已移除的观察者
+    weatherData.setTemperature(28.0f)
+}
+```
+
+在上述示例中，我们定义了主题接口 `Subject` 和观察者接口 `Observer`，其中主题接口包含了注册、删除和通知观察者的方法，观察者接口定义了一个更新的方法。
+
+然后我们创建了具体主题类 `WeatherData`
+
+，它维护了一个观察者列表，并在温度发生变化时通知所有注册的观察者。
+
+接下来，我们创建了具体观察者类 `Display`，它实现了观察者接口，并在接收到主题通知时进行相应的更新操作。
+
+在客户端代码中，我们创建了一个主题对象 `weatherData` 和一个观察者对象 `display`，并将观察者注册到主题中。然后模拟温度变化，并通过调用主题的 `setTemperature()` 方法来触发通知。
+
+运行上述代码将输出：
+
+```
+Temperature updated: 25.0
+Temperature updated: 30.0
+```
+
+通过使用观察者模式，我们实现了主题和观察者之间的解耦，主题对象可以在不知道具体观察者的情况下通知观察者，而观察者也可以自由地注册、删除和更新，从而实现了松耦合的设计。
+
 ## 3.4. 迭代器模式（Iterator Pattern）
+
+迭代器模式是一种行为设计模式，让你能在不暴露集合底层表现形式（列表、栈和树等）的情况下遍历集合中所有的元素。
+
+- 实现方式
+
+1. 声明迭代器接口。该接口必须提供至少一个方法来获取集合中的下个元素。但为了使用方便，你还可以添加一些其他方法，例如获取前一个元素、记录当前位置和判断迭代是否已结束。
+
+2. 声明集合接口并描述一个获取迭代器的方法。其返回值必须是迭代器接口。如果你计划拥有多组不同的迭代器，则可以声明多个类似的方法。
+
+3. 为希望使用迭代器进行遍历的集合实现具体迭代器类。迭代器对象必须与单个集合实体链接。链接关系通常通过迭代器的构造函数建立。
+
+4. 在你的集合类中实现集合接口。其主要思想是针对特定集合为客户端代码提供创建迭代器的快捷方式。集合对象必须将自身传递给迭代器的构造函数来创建两者之间的链接。
+
+5. 检查客户端代码，使用迭代器替代所有集合遍历代码。每当客户端需要遍历集合元素时都会获取一个新的迭代器。
+
+// 迭代器接口
+interface Iterator<T> {
+    fun hasNext(): Boolean
+    fun next(): T
+}
+
+// 聚合对象接口
+interface Aggregate<T> {
+    fun createIterator(): Iterator<T>
+}
+
+// 具体迭代器
+class ListIterator<T>(private val list: List<T>) : Iterator<T> {
+    private var currentIndex: Int = 0
+
+    override fun hasNext(): Boolean {
+        return currentIndex < list.size
+    }
+
+    override fun next(): T {
+        return if (hasNext()) {
+            val item = list[currentIndex]
+            currentIndex++
+            item
+        } else {
+            throw NoSuchElementException()
+        }
+    }
+}
+
+// 具体聚合对象
+class MyList<T>(private val items: MutableList<T> = mutableListOf()) : Aggregate<T> {
+    fun add(item: T) {
+        items.add(item)
+    }
+
+    fun remove(item: T) {
+        items.remove(item)
+    }
+
+    fun getItem(index: Int): T {
+        return items[index]
+    }
+
+    fun size(): Int {
+        return items.size
+    }
+
+    override fun createIterator(): Iterator<T> {
+        return ListIterator(items)
+    }
+}
+
+// 客户端代码
+fun main() {
+    val myList = MyList<Int>()
+    myList.add(1)
+    myList.add(2)
+    myList.add(3)
+
+    val iterator = myList.createIterator()
+
+    while (iterator.hasNext()) {
+        val item = iterator.next()
+        println(item)
+    }
+}
+
 ## 3.5. 命令模式（Command Pattern）
 ## 3.6. 备忘录模式（Memento Pattern）
 ## 3.7. 解释器模式（Interpreter Pattern）
