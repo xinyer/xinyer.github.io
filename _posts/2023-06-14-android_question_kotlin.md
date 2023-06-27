@@ -1,17 +1,169 @@
 ---
-title: Android 面试题 - Kotlin 篇
+title: Kotlin
 date: 2023-06-14 15:22:00 +0800
-categories: [Android]
-tags: [面试题，Kotlin]
+categories: [Kotlin]
+tags: [Kotlin]
 ---
-- [1. Kotlin 协程如何切换主线程和子线程？](#1-kotlin-协程如何切换主线程和子线程)
-- [2. Kotlin 相比 Java 的优点有哪些？](#2-kotlin-相比-java-的优点有哪些)
+- [1. 什么是协程？](#1-什么是协程)
+- [2. kotlin 协程中 suspend 关键字的作用？](#2-kotlin-协程中-suspend-关键字的作用)
+- [3. 如何创建一个 kotlin 协程？这些创建的方式的区别是什么？](#3-如何创建一个-kotlin-协程这些创建的方式的区别是什么)
+- [4. Kotlin 协程如何切换主线程和子线程？](#4-kotlin-协程如何切换主线程和子线程)
+- [5. Kotlin 协程中挂起是什么意思？](#5-kotlin-协程中挂起是什么意思)
+- [6. Kotlin 相比 Java 的优点有哪些？](#6-kotlin-相比-java-的优点有哪些)
 
-##  1. Kotlin 协程如何切换主线程和子线程？
+## 1. 什么是协程？
+协程是一种计算机程序组件，用于支持并发执行和协作式多任务处理。与线程或进程不同，协程并不受操作系统的调度管理，而是由程序自身来控制其执行流程。
+
+协程可以看作是一种特殊的子程序或函数，它可以在执行过程中暂停、保存当前状态，并在需要时恢复执行。这种暂停和恢复执行的能力使得协程能够轻松地切换执行上下文，从而实现协作式多任务处理。
+
+「协程 Coroutines」源自 Simula 和 Modula-2 语言，这个术语早在 1958 年就被 Melvin Edward Conway 发明并用于构建汇编程序，说明协程是一种编程思想，并不局限于特定的语言。
+
+Go 语言也有协程，叫 Goroutines，从英文拼写就知道它和 Coroutines 还是有些差别的（设计思想上是有关系的），否则 Kotlin 的协程完全可以叫 Koroutines 了
+
+协程的主要特点包括：
+
+1. 无需显式的并发锁：协程通过协作的方式进行任务切换，避免了显式的锁机制，简化了并发编程的复杂性。
+2. 轻量级：与线程相比，协程的创建和切换开销较小，可以在程序内部高效地创建大量的协程。
+3. 高效利用资源：协程可以在等待外部事件时暂停执行，释放 CPU 资源给其他协程使用，提高了资源利用率。
+4. 简化异步编程：协程提供了一种优雅的方式来处理异步任务，使得代码编写和理解更加直观。
+
+协程在许多编程语言中得到了支持，如 Python 的 asyncio 模块、Golang 的 goroutine、JavaScript 的 async/await 等。它们在编写高效的并发代码和处理 IO 密集型任务时具有重要的作用。
+
+## 2. kotlin 协程中 suspend 关键字的作用？
+
+在 Kotlin 协程中，suspend 关键字用于标记挂起函数（Suspending Function）。挂起函数是一种特殊类型的函数，可以在执行过程中暂停并恢复，而不会阻塞线程。它们是协程中异步操作的基本构建块。
+
+suspend 关键字的作用有以下几个方面：
+
+1. 标记挂起点：使用 suspend 关键字修饰的函数表示该函数可能会在某些操作（如长时间的 IO 操作或网络请求）发生时挂起当前协程的执行，以等待操作完成。这样可以避免阻塞线程并允许其他协程继续执行。
+2. 挂起函数的调用：只能在协程中或其他挂起函数中调用挂起函数。调用一个挂起函数时，协程会在该函数遇到挂起点时暂停执行，并将控制权交给其他协程，直到挂起函数的操作完成并恢复执行。
+3. 挂起函数的执行流程：编译器会自动为挂起函数生成额外的代码来管理挂起和恢复的逻辑。这包括保存函数执行的上下文信息，并在挂起点处暂停和恢复执行。
+
+## 3. 如何创建一个 kotlin 协程？这些创建的方式的区别是什么？
+在 Kotlin 中，有几种方式可以创建协程，每种方式都有其特定的使用场景和行为。以下是常见的创建协程的方式及其区别：
+
+1. `launch` 函数：`launch` 函数是最常用的创建协程的方式之一。它会创建一个新的协程，并立即启动执行。`launch` 函数返回一个 `Job` 对象，可以用于控制协程的生命周期，如取消协程的执行。使用 `launch` 函数创建的协程是无限制的，可以在任何上下文中执行。
+
+```kotlin
+fun main() {
+    GlobalScope.launch {
+        // 协程逻辑
+    }
+}
+```
+
+2. `async` 函数：`async` 函数与 `launch` 函数类似，也会创建一个新的协程。但与 `launch` 函数不同的是，`async` 函数会返回一个 `Deferred` 对象，该对象代表一个异步计算的结果。可以使用 `await()` 函数来获取 `Deferred` 对象的计算结果。使用 `async` 函数创建的协程也是无限制的。
+
+```kotlin
+fun main() = runBlocking {
+    val deferredResult = async {
+        // 异步计算逻辑
+        "Hello, Kotlin Coroutines!"
+    }
+
+    val result = deferredResult.await()
+    println(result) // 输出：Hello, Kotlin Coroutines!
+}
+```
+
+3. `runBlocking` 函数：`runBlocking` 函数用于创建一个新的协程作用域，并阻塞当前线程，直到该协程作用域中的所有协程执行完毕。它通常用于在**顶层函数或测试**中创建协程，或者用于在非协程环境中等待协程执行完成。
+
+```kotlin
+fun main() = runBlocking {
+    // 协程逻辑
+}
+```
+
+4. 自定义协程构建器：除了使用内置的 `launch`、`async` 和 `runBlocking` 函数外，还可以使用协程库提供的构建器函数来创建自定义的协程。通过自定义协程构建器，可以灵活地定义协程的执行逻辑、调度策略和异常处理方式。
+
+```kotlin
+fun main() = runBlocking {
+    val myCoroutine = myCoroutine {
+        // 自定义协程逻辑
+    }
+
+    myCoroutine.join()
+}
+
+suspend fun myCoroutine(block: suspend () -> Unit): Job {
+    // 协程逻辑
+}
+```
+
+自定义协程构建器可以根据需求来扩展协程的行为，例如添加超时、重试等特性。
+
+需要注意的是，协程的创建方式决定了它们的执行范围和生命周期。使用 `launch` 和 `async` 函数创建的协程是无限制的，可以在任何上下文中执行，但需要手动管理它们的生命周期。而使用 `runBlocking` 函数创建的协程是有限制的，它会阻塞当前线程，直到
+
+其中的协程执行完成。因此，在选择创建协程的方式时，需要根据实际需求和场景来进行选择和权衡。
+
+##  4. Kotlin 协程如何切换主线程和子线程？
 
 Kotlin 协程使用挂起函数和协程上下文来实现线程切换，而不是直接依赖于 Android 的 Handler。协程通过调度器来管理线程的执行和切换，其中 Dispatchers.Main 用于切换到主线程，Dispatchers.IO 用于切换到子线程。这种机制简化了在 Android 中进行异步编程和线程切换的过程。
 
-## 2. Kotlin 相比 Java 的优点有哪些？
+## 5. Kotlin 协程中挂起是什么意思？
+
+在 Kotlin 协程中，挂起（Suspending）是指协程的执行暂时中断，并且将协程的执行状态和上下文保存起来，以便稍后能够恢复执行。
+
+当协程中遇到一个挂起函数（suspend function）时，该协程会暂停执行，而不是阻塞线程。在挂起期间，协程会释放所占用的线程资源，并允许其他协程在相同的线程上执行。这使得协程能够以非阻塞的方式执行耗时的操作，例如网络请求、文件读写或长时间的计算。
+
+在挂起期间，协程的执行状态和上下文信息会被保存，包括局部变量的值、程序计数器位置等。这样，当挂起操作完成后，协程可以从之前的挂起点继续执行，而不会丢失其执行状态。
+
+挂起函数可以是自定义的挂起函数，也可以是标准库或第三方库中提供的挂起函数。在 Kotlin 中，挂起函数通常通过使用 `suspend` 关键字来进行标记，以表明它们可能会挂起当前协程的执行。
+
+以下是一个简单的示例，展示了协程中的挂起操作：
+
+```kotlin
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+
+suspend fun doNetworkRequest(): String {
+    delay(1000) // 模拟网络请求的延迟
+    return "Response from network"
+}
+
+fun main() = runBlocking {
+    println("Start")
+
+    launch {
+        println("Before network request")
+        val result = doNetworkRequest() // 挂起点：执行网络请求
+        println("After network request: $result")
+    }
+
+    println("End")
+}
+```
+
+在上述示例中，`doNetworkRequest()` 函数是一个挂起函数，它通过 `delay()` 函数模拟了一个网络请求的延迟。当协程执行到 `doNetworkRequest()` 函数时，协程会暂停执行，等待 1 秒钟的延迟，然后恢复执行。
+
+通过挂起操作，协程可以避免阻塞线程，而是以异步的方式执行耗时的操作。这样可以提高程序的并发性能和响应能力，同时保持代码的简洁和可读性。
+
+**注意，挂起不是这个协程停下来了！是脱离，当前线程不再管这个协程要去做什么了。**
+
+线程的代码在到达 suspend 函数的时候被掐断，接下来协程会从这个 suspend 函数开始继续往下执行，不过是在指定的线程。谁指定的？是 suspend 函数指定的，比如我们这个例子中，函数内部的 withContext 传入的 Dispatchers.IO 所指定的 IO 线程。
+
+Dispatchers 调度器，它可以将协程限制在一个特定的线程执行，或者将它分派到一个线程池，或者让它不受限制地运行，关于 Dispatchers 这里先不展开了。
+
+那我们平日里常用到的调度器有哪些？
+
+常用的 Dispatchers，有以下三种：
+
+1. Dispatchers.Main：Android 中的主线程
+2. Dispatchers.IO：针对磁盘和网络 IO 进行了优化，适合 IO 密集型的任务，比如：读写文件，操作数据库以及网络请求
+3. Dispatchers.Default：适合 CPU 密集型的任务，比如计算
+
+回到我们的协程，它从 suspend 函数开始脱离启动它的线程，继续执行在 Dispatchers 所指定的 IO 线程。
+
+紧接着在 suspend 函数执行完成之后，协程会自动帮我们把线程再切回来。
+
+这个「切回来」是什么意思？
+
+我们的协程原本是运行在主线程的，当代码遇到 suspend 函数的时候，发生线程切换，根据 Dispatchers 切换到了 IO 线程；
+
+当这个函数执行完毕后，线程又切了回来，「切回来」也就是协程会帮我再 post 一个 Runnable，让我剩下的代码继续回到主线程去执行。
+
+## 6. Kotlin 相比 Java 的优点有哪些？
 
 1. 更简洁：Kotlin 代码相对于 Java 更加简洁，可以通过更少的代码实现相同的功能。它引入了很多简化语法和特性，例如类型推断、空安全、扩展函数等，使得代码更易读、更易写。
 

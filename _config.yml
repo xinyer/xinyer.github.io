@@ -43,8 +43,8 @@ social:
     - https://twitter.com/xinyer # change to your twitter homepage
     - https://github.com/xinyer # change to your github homepage
     # Uncomment below to add more social links
-    # - https://www.facebook.com/username
-    # - https://www.linkedin.com/in/username
+    # - https://www.facebook.com/xin.wang.56481
+    # - https://www.linkedin.com/in/xinwang
 
 google_site_verification: # fill in to your verification string
 
@@ -85,10 +85,10 @@ avatar: ./assets/author/avatar.png
 toc: true
 
 comments:
-  active: # The global switch for posts comments, e.g., 'disqus'.  Keep it empty means disable
+  active: disqus # The global switch for posts comments, e.g., 'disqus'.  Keep it empty means disable
   # The active options are as follows:
   disqus:
-    shortname: # fill with the Disqus shortname. › https://help.disqus.com/en/articles/1717111-what-s-a-shortname
+    shortname: xinyer # fill with the Disqus shortname. › https://help.disqus.com/en/articles/1717111-what-s-a-shortname
   # utterances settings › https://utteranc.es/
   utterances:
     repo: # <gh-username>/<repo>
