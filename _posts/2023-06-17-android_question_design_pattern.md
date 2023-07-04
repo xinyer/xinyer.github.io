@@ -1411,6 +1411,164 @@ fun main() {
 ## 3.7. 解释器模式（Interpreter Pattern）
 ## 3.8. 状态模式（State Pattern）
 ## 3.9. 职责链模式（Chain of Responsibility Pattern）
+
+责任链模式（Chain of Responsibility Pattern）是一种行为型设计模式，它允许多个对象依次处理请求，形成一个处理链。当一个请求从链的起始点发出时，沿着链传递，直到有一个对象能够处理该请求或者到达链的末尾。
+
+责任链模式涉及以下几个关键角色：
+
+抽象处理者（Handler）：定义处理请求的接口，通常包含一个指向下一个处理者的引用。
+
+具体处理者（Concrete Handler）：实现抽象处理者接口，并负责处理特定类型的请求。如果自己无法处理请求，则将请求传递给下一个处理者。
+
+```
+     ┌─────────┐
+     │ Request │
+     └─────────┘
+          │
+┌ ─ ─ ─ ─ ┼ ─ ─ ─ ─ ┐
+          ▼
+│  ┌─────────────┐  │
+   │   HandlerA  │
+│  └─────────────┘  │
+          │
+│         ▼         │
+   ┌─────────────┐
+│  │   HandlerB  │  │
+   └─────────────┘
+│         │         │
+          ▼
+│  ┌─────────────┐  │
+   │   HandlerC  │
+│  └─────────────┘  │
+          │
+└ ─ ─ ─ ─ ┼ ─ ─ ─ ─ ┘
+          │
+          ▼
+```
+下面是使用 Kotlin 语言编写的责任链模式示例代码：
+
+```kotlin
+// 抽象处理者
+abstract class Handler {
+    private var nextHandler: Handler? = null
+
+    fun setNextHandler(handler: Handler) {
+        nextHandler = handler
+    }
+
+    fun handleRequest(request: Request) {
+        if (canHandleRequest(request)) {
+            processRequest(request)
+        } else {
+            nextHandler?.handleRequest(request)
+        }
+    }
+
+    protected abstract fun canHandleRequest(request: Request): Boolean
+
+    protected abstract fun processRequest(request: Request)
+}
+
+// 具体处理者 - 文本处理器
+class TextHandler : Handler() {
+    override fun canHandleRequest(request: Request): Boolean {
+        return request.type == RequestType.TEXT
+    }
+
+    override fun processRequest(request: Request) {
+        println("TextHandler: Processing request ${request.content}")
+    }
+}
+
+// 具体处理者 - 图片处理器
+class ImageHandler : Handler() {
+    override fun canHandleRequest(request: Request): Boolean {
+        return request.type == RequestType.IMAGE
+    }
+
+    override fun processRequest(request: Request) {
+        println("ImageHandler: Processing request ${request.content}")
+    }
+}
+
+// 具体处理者 - 视频处理器
+class VideoHandler : Handler() {
+    override fun canHandleRequest(request: Request): Boolean {
+        return request.type == RequestType.VIDEO
+    }
+
+    override fun processRequest(request: Request) {
+        println("VideoHandler: Processing request ${request.content}")
+    }
+}
+
+// 请求类
+data class Request(val type: RequestType, val content: String)
+
+// 请求类型枚举
+enum class RequestType {
+    TEXT, IMAGE, VIDEO
+}
+
+// 客户端代码
+fun main() {
+    val textHandler = TextHandler()
+    val imageHandler = ImageHandler()
+    val videoHandler = VideoHandler()
+
+    textHandler.setNextHandler(imageHandler)
+    imageHandler.setNextHandler(videoHandler)
+
+    val request1 = Request(RequestType.TEXT, "Hello, World!")
+    val request2 = Request(RequestType.IMAGE, "cat.jpg")
+    val request3 = Request(RequestType.VIDEO, "video.mp4")
+
+    textHandler.handleRequest(request1)
+    textHandler.handleRequest(request2)
+    textHandler.handleRequest(request3)
+}
+```
+
+另一种实现方式是把这些 Handler 组成一个链，并通过一个统一入口处理：
+
+```java
+public class HandlerChain {
+    // 持有所有 Handler:
+    private List<Handler> handlers = new ArrayList<>();
+
+    public void addHandler(Handler handler) {
+        this.handlers.add(handler);
+    }
+
+    public boolean process(Request request) {
+        // 依次调用每个 Handler:
+        for (Handler handler : handlers) {
+            Boolean r = handler.process(request);
+            if (r != null) {
+                // 如果返回 TRUE 或 FALSE，处理结束：
+                System.out.println(request + " " + (r ? "Approved by " : "Denied by ") + handler.getClass().getSimpleName());
+                return r;
+            }
+        }
+        throw new RuntimeException("Could not handle request: " + request);
+    }
+}
+```
+现在，我们就可以在客户端组装出责任链，然后用责任链来处理请求：
+
+```java
+// 构造责任链：
+HandlerChain chain = new HandlerChain();
+chain.addHandler(new ManagerHandler());
+chain.addHandler(new DirectorHandler());
+chain.addHandler(new CEOHandler());
+// 处理请求：
+chain.process(new Request("Bob", new BigDecimal("123.45")));
+chain.process(new Request("Alice", new BigDecimal("1234.56")));
+```
+
+还有一些责任链模式，每个 Handler 都有机会处理 Request，通常这种责任链被称为拦截器（Interceptor）或者过滤器（Filter），它的目的不是找到某个 Handler 处理掉 Request，而是每个 Handler 都做一些工作
+
 ## 3.10. 访问者模式（Visitor Pattern）
 ## 3.11. 中介者模式（Mediator Pattern）
 
