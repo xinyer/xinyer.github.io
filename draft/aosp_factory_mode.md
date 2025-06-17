@@ -6,6 +6,8 @@
 
 拨号键盘 *#*#4636#*#*
 
+小米手机 *#*#6484#*#*
+
 中间的数字有很多种，可以进入不同的测试功能
 
 ![emulatot factory mode](/assets/images/emulator_factory_mode.png)

@@ -10,6 +10,8 @@ tags: [Kotlin]
 - [4. Kotlin 协程如何切换主线程和子线程？](#4-kotlin-协程如何切换主线程和子线程)
 - [5. Kotlin 协程中挂起是什么意思？](#5-kotlin-协程中挂起是什么意思)
 - [6. Kotlin 相比 Java 的优点有哪些？](#6-kotlin-相比-java-的优点有哪些)
+- [7. kotlin delegate](#7-kotlin-delegate)
+- [8. Kotlin 动态代理和委托实现空接口](#8-kotlin-动态代理和委托实现空接口)
 
 ## 1. 什么是协程？
 协程是一种计算机程序组件，用于支持并发执行和协作式多任务处理。与线程或进程不同，协程并不受操作系统的调度管理，而是由程序自身来控制其执行流程。
@@ -180,3 +182,33 @@ Dispatchers 调度器，它可以将协程限制在一个特定的线程执行�
 7. 协程支持：Kotlin 内置了协程（Coroutines）支持，使得异步编程更加简单和直观。协程可以避免回调地狱，提供了一种顺序编写异步代码的方式，简化了并发和异步操作的处理。
 
 这些是 Kotlin 相对于 Java 的一些优点，使得 Kotlin 成为一门受欢迎的编程语言，被广泛用于 Android 开发和其他领域的应用开发。
+
+## 7. kotlin delegate
+
+## 8. Kotlin 动态代理和委托实现空接口
+
+```kotlin
+internal inline fun <reified T : Any> noOpDelegate(): T {
+  val javaClass = T::class.java
+  return Proxy.newProxyInstance(
+    javaClass.classLoader, arrayOf(javaClass), NO_OP_HANDLER
+  ) as T
+}
+
+private val NO_OP_HANDLER = InvocationHandler { _, _, _ ->
+  // no op
+}
+```
+
+在实现某个接口的时候只需要实现必须的方法
+
+```kotlin
+private val lifecycleCallbacks =
+    object : Application.ActivityLifecycleCallbacks by noOpDelegate() {
+      override fun onActivityDestroyed(activity: Activity) {
+        reachabilityWatcher.expectWeaklyReachable(
+          activity, "${activity::class.java.name} received Activity#onDestroy() callback"
+        )
+      }
+    }
+```
