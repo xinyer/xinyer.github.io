@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#a9e0f0" />
+<meta name="description" content="动物森友会风格的记忆卡片小游戏：按 1 → 9 的顺序翻开卡片，用星球角色挑战排行榜。" />
+<title>记忆卡片 · 按顺序翻牌</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%237fce5c'/%3E%3Cpath d='M8 26C8 15 15 8 26 8c0 11-7 18-18 18z' fill='%23fdf8ec'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<!-- ============ 背景场景（装饰层） ============ -->
+<div class="scene" aria-hidden="true">
+  <div class="scene__sky"></div>
+  <div class="scene__sun"></div>
+
+  <div class="scene__clouds">
+    <span class="cloud cloud--a"></span>
+    <span class="cloud cloud--b"></span>
+    <span class="cloud cloud--c"></span>
+  </div>
+
+  <div class="scene__ground">
+    <span class="grass-tuft grass-tuft--1"></span>
+    <span class="grass-tuft grass-tuft--2"></span>
+    <span class="grass-tuft grass-tuft--3"></span>
+    <span class="grass-tuft grass-tuft--4"></span>
+  </div>
+
+  <div class="scene__leaves" id="leaves"></div>
+</div>
+
+<!-- ============ 主舞台 ============ -->
+<main class="stage">
+
+  <!-- 标题木牌 -->
+  <header class="signboard">
+    <span class="signboard__ring" aria-hidden="true"></span>
+
+    <!-- 当前角色头像，点它可换角色 -->
+    <button type="button" class="signboard__badge" id="roleBtn" aria-label="切换角色">
+      <img id="roleAvatar" src="assets/avatars/earth.png" alt="当前角色头像" />
+    </button>
+
+    <h1 class="signboard__title">记忆卡片</h1>
+    <p class="signboard__sub">
+      <strong id="roleName">地球</strong> · 按 <strong>1 → 9</strong> 的顺序翻开卡片
+    </p>
+  </header>
+
+  <!-- 状态栏 -->
+  <section class="hud">
+    <ol class="progress" id="progress" aria-label="翻牌进度"></ol>
+
+    <div class="hud__side">
+      <span class="chip chip--timer" title="本局用时">
+        <svg class="chip__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="13.5" r="7.5" />
+          <path d="M12 9.5v4l2.5 1.5" />
+          <path d="M9.5 2.5h5" />
+        </svg>
+        <strong class="chip__value" id="timer">0:00.0</strong>
+      </span>
+
+      <span class="chip" title="翻错次数">
+        <span class="chip__label">失误</span>
+        <strong class="chip__value" id="misses">0</strong>
+      </span>
+
+      <button type="button" class="iconbtn" id="soundBtn" aria-pressed="true" aria-label="关闭音效">
+        <svg class="iconbtn__on" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 5 6.5 9H3v6h3.5L11 19z" />
+          <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+          <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+        </svg>
+        <svg class="iconbtn__off" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 5 6.5 9H3v6h3.5L11 19z" />
+          <path d="m16 10 5 5M21 10l-5 5" />
+        </svg>
+      </button>
+
+      <button type="button" class="btn btn--reset" id="resetBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1" />
+          <path d="M3.5 4.5V10H9" />
+        </svg>
+        重新开始
+      </button>
+    </div>
+  </section>
+
+  <!-- 牌桌 -->
+  <section class="playfield">
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <p class="status" id="status" role="status" aria-live="polite">
+    卡片已洗好，从 <strong>1</strong> 开始吧。
+  </p>
+
+  <!-- ============ 排行榜（内嵌在游戏区下方，无需点击展开） ============ -->
+  <section class="board-panel" id="boardPanel" aria-labelledby="boardTitle">
+    <header class="board-panel__head">
+      <span class="board-panel__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7.5 4h9v4.5a4.5 4.5 0 0 1-9 0z" />
+          <path d="M7.5 5.5H5v1.2A3.3 3.3 0 0 0 8.3 10" />
+          <path d="M16.5 5.5H19v1.2A3.3 3.3 0 0 1 15.7 10" />
+          <path d="M12 13v2.5" />
+          <path d="M9.5 20.5h5l-.6-3h-3.8z" />
+        </svg>
+      </span>
+      <h2 class="board-panel__title" id="boardTitle">排行榜</h2>
+      <span class="board-panel__mode" id="boardMode">简单</span>
+    </header>
+
+    <div class="tabs" role="tablist" aria-label="排行榜类型">
+      <button type="button" class="tab is-active" role="tab" aria-selected="true" data-board="time">
+        最快用时
+      </button>
+      <button type="button" class="tab" role="tab" aria-selected="false" data-board="miss">
+        最少失误
+      </button>
+    </div>
+
+    <p class="board__hint" id="boardHint"></p>
+    <ol class="board" id="boardList"></ol>
+    <p class="board__empty" id="boardEmpty" hidden>还没有成绩，先去挑战一次吧</p>
+  </section>
+</main>
+
+<!-- ============ 角色选择 ============ -->
+<section class="screen" id="selectScreen" hidden aria-labelledby="selectTitle">
+  <div class="screen__panel">
+    <header class="screen__head">
+      <h2 class="screen__title" id="selectTitle">准备开始</h2>
+      <p class="screen__sub">挑一个星球，再选一档难度</p>
+    </header>
+
+    <div class="setup">
+      <p class="setup__label">角色</p>
+      <div class="roles" id="roles" role="radiogroup" aria-label="星球角色"></div>
+    </div>
+
+    <div class="setup setup--mode">
+      <p class="setup__label">难度</p>
+      <div class="modes" id="modes" role="radiogroup" aria-label="难度模式"></div>
+    </div>
+
+    <footer class="screen__foot">
+      <button type="button" class="btn btn--primary" id="startBtn">开始挑战</button>
+    </footer>
+  </div>
+</section>
+
+<!-- ============ 胜利弹窗 ============ -->
+<div class="modal" id="modal" hidden>
+  <div class="modal__backdrop" data-close="1"></div>
+  <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <span class="modal__avatar" aria-hidden="true">
+      <img id="modalAvatar" src="assets/avatars/earth.png" alt="角色头像" />
+    </span>
+
+    <h2 class="modal__title" id="modalTitle">全部正确！</h2>
+    <p class="modal__text"><strong id="modalRole">地球</strong> 按 1 → 9 翻开了所有卡片</p>
+
+    <dl class="modal__stats">
+      <div class="modal__stat">
+        <dt>用时</dt>
+        <dd id="modalTime">0:00.0</dd>
+      </div>
+      <div class="modal__stat">
+        <dt>失误</dt>
+        <dd id="modalMiss">0</dd>
+      </div>
+    </dl>
+
+    <p class="modal__record" id="modalRecord" hidden>刷新纪录</p>
+
+    <div class="modal__actions">
+      <button type="button" class="btn btn--primary" id="againBtn">再玩一次</button>
+      <button type="button" class="btn btn--ghost" id="modalBoardBtn">看排行榜</button>
+    </div>
+  </div>
+</div>
+
+<canvas class="confetti" id="confetti" aria-hidden="true"></canvas>
+
+<script src="js/audio.js"></script>
+<script src="js/characters.js"></script>
+<script src="js/problems.js"></script>
+<script src="js/leaderboard.js"></script>
+<script src="js/game.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

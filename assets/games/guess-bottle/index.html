@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>猜瓶子 · 小学生推理小游戏</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- 背景装饰：动物森友会风格的户外世界（阳光 / 白云 / 草坡 / 落叶 / 野花） -->
+  <div class="bg-decor" aria-hidden="true">
+    <span class="ac-sun"></span>
+    <span class="cloud cloud-1"></span>
+    <span class="cloud cloud-2"></span>
+    <span class="cloud cloud-3"></span>
+    <span class="leaf-fall leaf-1">🍃</span>
+    <span class="leaf-fall leaf-2">🍃</span>
+    <span class="leaf-fall leaf-3">🍂</span>
+    <span class="flower flower-1">🌼</span>
+    <span class="flower flower-2">🌷</span>
+    <span class="flower flower-3">🌸</span>
+    <span class="bg-dot bg-dot-1"></span>
+    <span class="bg-dot bg-dot-2"></span>
+    <span class="bg-dot bg-dot-3"></span>
+    <span class="bg-dot bg-dot-4"></span>
+    <span class="hill hill-back"></span>
+    <span class="hill hill-front"></span>
+    <span class="ground"></span>
+  </div>
+
+  <header class="game-header">
+    <div class="title-sign">
+      <h1><span class="h1-leaf" aria-hidden="true">🍃</span>猜瓶子</h1>
+    </div>
+    <p class="subtitle">把彩色瓶子摆到木架上，看看猜中几个！</p>
+  </header>
+
+  <!-- 难度设置 -->
+  <section class="controls panel" aria-label="难度设置">
+    <div class="control-group">
+      <span class="control-label">瓶子个数</span>
+      <div class="segmented" id="bottleCountGroup" role="group" aria-label="瓶子个数">
+        <button type="button" data-n="3">3</button>
+        <button type="button" data-n="4">4</button>
+        <button type="button" data-n="5">5</button>
+        <button type="button" data-n="6">6</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <span class="control-label">架子空格</span>
+      <div class="segmented" id="emptyCountGroup" role="group" aria-label="架子空格数">
+        <button type="button" data-m="0">0</button>
+        <button type="button" data-m="1">1</button>
+        <button type="button" data-m="2">2</button>
+      </div>
+    </div>
+    <div class="control-group control-group-actions">
+      <button type="button" id="btnRestart" class="btn btn-secondary">🔄 重新开始</button>
+      <button type="button" id="btnSound" class="btn btn-ghost">🔊 音效开</button>
+      <button type="button" id="btnGiveUp" class="btn btn-ghost">👀 看答案</button>
+    </div>
+  </section>
+
+  <main class="game-area">
+    <!-- 货架 -->
+    <div class="board-column">
+      <div class="shelf" id="shelf">
+        <div class="shelf-row-label">你摆的位置</div>
+        <div class="slot-row" id="slotRow"></div>
+        <div class="shelf-divider" aria-hidden="true"></div>
+        <div class="shelf-row-label">神秘瓶子（背面朝你，看不见哦）</div>
+        <div class="back-row" id="backRow"></div>
+        <div class="shelf-plank" aria-hidden="true"></div>
+      </div>
+
+      <div class="placed-info" id="placedInfo"></div>
+
+      <button type="button" id="btnGuess" class="btn btn-guess" disabled>🔍 猜瓶子</button>
+
+      <div class="result" id="resultMsg" role="status" aria-live="polite"></div>
+    </div>
+
+    <!-- 瓶子池 -->
+    <aside class="pool-column panel" aria-label="彩色瓶子池">
+      <h2 class="pool-title">彩色瓶子</h2>
+      <div class="pool" id="pool"></div>
+      <p class="pool-tip">拖动，或先点瓶子再点位置</p>
+    </aside>
+  </main>
+
+  <!-- 尝试记录 -->
+  <section class="history panel" aria-label="尝试记录">
+    <h2 class="history-title">尝试记录</h2>
+    <div class="history-list" id="historyList"></div>
+  </section>
+
+  <!-- 成绩排行榜（每局一条，按「猜瓶子」次数从少到多排） -->
+  <section class="ranking panel" aria-label="成绩排行榜">
+    <div class="ranking-head">
+      <h2 class="ranking-title">成绩排行榜</h2>
+      <span class="ranking-rule">「猜瓶子」点得越少越靠前</span>
+      <button type="button" id="btnClearRanking" class="btn btn-ghost">🧹 清空</button>
+    </div>
+    <div class="ranking-stats" id="rankingStats"></div>
+    <div class="ranking-list" id="rankingList"></div>
+  </section>
+
+  <!-- 拖拽幽灵层 -->
+  <div class="ghost-layer" id="ghostLayer" aria-hidden="true"></div>
+  <!-- 庆祝彩带层 -->
+  <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
+  <!-- 弹窗 -->
+  <div class="overlay" id="overlay">
+    <div class="overlay-card" id="overlayCard"></div>
+  </div>
+
+  <!-- 顺序加载：逻辑 → 瓶子渲染 → 排行榜 → 本地存储 → 音效 → 主流程（非 module） -->
+  <script src="js/logic.js"></script>
+  <script src="js/bottle.js"></script>
+  <script src="js/ranking.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

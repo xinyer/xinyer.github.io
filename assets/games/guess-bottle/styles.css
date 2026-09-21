@@ -1,0 +1,1006 @@
+/* styles.css —— 《猜瓶子》样式（小学生向 · 动物森友会风格 · 浅色主题 · 响应式）
+
+   动森视觉体系要点：
+   1. 背景：天空渐变 → 草坡 + 草地地平线，白云、阳光、落叶、小野花点缀；
+   2. 面板：奶油色圆角卡片 + 棕褐色描边 + 内侧虚线缝线 + 底部厚边（木牌/纸卡质感）；
+   3. 货架：木质搁板，瓶子像摆在户外木桌上；
+   4. 按钮：圆润药丸形 + 底部 3px 深色「厚底」，按下去会陷进去；
+   5. 文字：暖棕色系（而非冷灰蓝），圆体字 + 白色浮雕描边。
+*/
+
+:root {
+  /* ---------- 动森色板 ---------- */
+  --ac-cream: #FFFCF2;       /* 卡片主色 */
+  --ac-cream-2: #FBF1D9;     /* 内层纸卡 */
+  --ac-cream-3: #F6E7C6;     /* 更深的纸色 */
+  --ac-tan: #E8D9B5;         /* 浅描边 */
+  --ac-tan-2: #D8C094;       /* 主描边 */
+  --ac-tan-3: #C0A472;       /* 厚底 / 虚线缝线 */
+  --ac-tan-4: #B99C6B;       /* 深一点 */
+  --ac-brown: #7A5A38;       /* 木质深棕 */
+  --ac-brown-2: #5E452B;
+
+  --ac-green: #7CC44E;
+  --ac-green-d: #4E9830;
+  --ac-green-l: #9FDD6B;
+  --ac-leaf: #5FAE45;
+
+  --ac-yellow: #FFD86B;
+  --ac-yellow-d: #D99A28;
+  --ac-water: #7ECBEC;
+  --ac-water-d: #3E9DC4;
+  --ac-pink: #F7A3B8;
+
+  /* 用于文字（而非装饰色块）的安全变体：均满足 WCAG AA 4.5:1 */
+  --ac-green-text: #35681E;
+  --ac-water-text: #1F6B85;
+
+  /* 文字（暖棕系，浅底深字） */
+  --ink: #5A4936;
+  --ink-soft: #7A664F;
+  --ink-faint: #7F6D57;
+
+  /* 面板 */
+  --panel: var(--ac-cream);
+  --panel-soft: var(--ac-cream-2);
+  --line: var(--ac-tan);
+
+  --shadow: 0 4px 0 var(--ac-tan), 0 16px 30px rgba(122, 90, 56, 0.16);
+  --shadow-sm: 0 3px 0 var(--ac-tan), 0 10px 20px rgba(122, 90, 56, 0.14);
+
+  --radius-lg: 28px;
+  --radius-md: 18px;
+  --radius-sm: 13px;
+
+  /* 尺寸（最多 8 个槽位，360px 宽下也必须完整可见） */
+  --bottle-w: clamp(30px, 7.4vw, 56px);
+  --pool-bottle-w: clamp(38px, 9vw, 64px);
+  --slot-gap: clamp(3px, 1vw, 10px);
+
+  --font: 'Yuanti SC', 'YuanTi SC', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  color: var(--ink);
+  min-height: 100vh;
+  position: relative;
+  padding: 18px clamp(12px, 4vw, 40px) 44px;
+  overflow-x: hidden;
+  letter-spacing: 0.4px;
+  /* 天空 → 草地 的纵向渐变 */
+  background: linear-gradient(
+    180deg,
+    #CFEEFF 0%,
+    #B7E6FB 26%,
+    #DCF3E6 52%,
+    #A9DC7A 78%,
+    #8CCB5C 100%
+  );
+  background-attachment: fixed;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ---------- 背景装饰：动森的户外世界 ---------- */
+.bg-decor {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* 阳光 */
+.ac-sun {
+  position: absolute;
+  top: 4%;
+  left: 6%;
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FFF3C4 0%, #FFE07A 58%, rgba(255, 224, 122, 0) 72%);
+  box-shadow: 0 0 60px 18px rgba(255, 232, 150, 0.55);
+}
+
+/* 白云（动森式圆润三连球） */
+.cloud {
+  position: absolute;
+  background: #ffffff;
+  opacity: 0.92;
+  border-radius: 999px;
+  box-shadow: 34px 10px 0 -4px #fff, -46px 14px 0 -14px #fff,
+    0 16px 24px rgba(120, 160, 190, 0.14);
+}
+.cloud-1 { width: 118px; height: 50px; top: 6%; right: 12%; }
+.cloud-2 { width: 88px; height: 40px; top: 17%; left: 30%; opacity: 0.8; }
+.cloud-3 { width: 70px; height: 34px; top: 30%; right: 4%; opacity: 0.7; }
+
+/* 落叶 */
+.leaf-fall {
+  position: absolute;
+  font-size: 20px;
+  opacity: 0.9;
+  filter: drop-shadow(0 4px 6px rgba(90, 120, 60, 0.25));
+  animation: leaf-sway 7s ease-in-out infinite;
+}
+.leaf-1 { top: 22%; left: 8%; }
+.leaf-2 { top: 42%; right: 12%; font-size: 17px; animation-duration: 8.5s; animation-delay: -2s; }
+.leaf-3 { top: 62%; left: 4%; font-size: 15px; animation-duration: 6s; animation-delay: -4s; }
+
+/* 小野花与岛果点 */
+.flower { position: absolute; font-size: 18px; opacity: 0.85; }
+.flower-1 { bottom: 16%; left: 7%; }
+.flower-2 { bottom: 9%; right: 9%; font-size: 16px; }
+.flower-3 { bottom: 26%; right: 3%; font-size: 14px; }
+
+.bg-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  opacity: 0.5;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35);
+}
+.bg-dot-1 { top: 26%; left: 22%; }
+.bg-dot-2 { top: 48%; left: 74%; }
+.bg-dot-3 { top: 12%; left: 58%; }
+.bg-dot-4 { top: 68%; left: 30%; }
+
+/* 远处草坡 + 近处草坡 + 地平线草皮 */
+.hill {
+  position: absolute;
+  left: -12%;
+  width: 124%;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+}
+.hill-back {
+  bottom: 74px;
+  height: 150px;
+  background: linear-gradient(180deg, #B7E489 0%, #9CD867 100%);
+  opacity: 0.9;
+}
+.hill-front {
+  bottom: 52px;
+  left: -20%;
+  width: 140%;
+  height: 118px;
+  background: linear-gradient(180deg, #9FDB6C 0%, #7FC44C 100%);
+}
+.ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 60px;
+  background:
+    /* 草叶纹理 */
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.16) 0 2px,
+      rgba(255, 255, 255, 0) 2px 9px
+    ),
+    linear-gradient(180deg, #86C953 0%, #6CB141 100%);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.28);
+}
+.ground::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -7px;
+  height: 12px;
+  background:
+    radial-gradient(circle at 6px 12px, #86C953 0 6px, rgba(0, 0, 0, 0) 7px)
+      0 0 / 22px 12px repeat-x;
+}
+
+/* 内容置顶于装饰之上 */
+.game-header, .controls, .game-area, .history, .ranking {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- 动森通用面板（纸卡 / 木牌） ---------- */
+.panel {
+  position: relative;
+  background: linear-gradient(180deg, #FFFEF8 0%, var(--ac-cream) 42%, var(--ac-cream-2) 100%);
+  border: 3px solid var(--ac-tan-2);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+/* 内侧虚线缝线 */
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 2px dashed var(--ac-tan);
+  border-radius: calc(var(--radius-lg) - 9px);
+  pointer-events: none;
+}
+
+/* ---------- 头部：木质招牌 ---------- */
+.game-header { text-align: center; margin: 4px 0 18px; }
+
+.title-sign {
+  position: relative;
+  display: inline-block;
+  padding: 12px clamp(26px, 5vw, 42px) 14px;
+  background: linear-gradient(180deg, #FFFDF4 0%, #FDF3D9 55%, #F7E8C6 100%);
+  border: 3px solid var(--ac-tan-2);
+  border-radius: 24px;
+  box-shadow: 0 6px 0 var(--ac-tan-4), 0 16px 26px rgba(122, 90, 56, 0.2),
+    inset 0 3px 0 #ffffff;
+}
+.title-sign::before,
+.title-sign::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #FFF6DF, #D9C094 70%);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9);
+}
+.title-sign::before { left: 12px; }
+.title-sign::after { right: 12px; }
+
+.game-header h1 {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: clamp(26px, 5vw, 44px);
+  letter-spacing: 3px;
+  color: #6B4E2E;
+  text-shadow: 0 2px 0 #ffffff, 0 5px 0 rgba(216, 192, 148, 0.75);
+}
+.h1-leaf {
+  font-size: 0.82em;
+  text-shadow: none;
+  transform: rotate(-12deg);
+}
+
+.subtitle {
+  display: inline-block;
+  margin: 12px 0 0;
+  padding: 6px 18px;
+  color: var(--ink-soft);
+  font-size: clamp(13px, 2.4vw, 16px);
+  font-weight: 700;
+  background: rgba(255, 252, 242, 0.86);
+  border: 2px dashed var(--ac-tan);
+  border-radius: 999px;
+}
+
+/* ---------- 通用按钮（圆润 + 底部厚边） ---------- */
+.btn {
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  border: 2px solid var(--ac-tan-2);
+  border-radius: 999px;
+  padding: 9px 20px 11px;
+  cursor: pointer;
+  color: var(--ac-brown);
+  background: linear-gradient(180deg, #FFFEF8, #F7ECD3);
+  box-shadow: 0 4px 0 var(--ac-tan-3), inset 0 2px 0 #ffffff;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.15s ease,
+    color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:hover:not(:disabled) { transform: translateY(-1px); }
+.btn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--ac-tan-3), inset 0 2px 0 rgba(255, 255, 255, 0.7);
+}
+
+.btn-primary {
+  color: #2F5B12;
+  background: linear-gradient(180deg, var(--ac-green-l), var(--ac-green));
+  border-color: var(--ac-green-d);
+  box-shadow: 0 5px 0 var(--ac-green-d), inset 0 2px 0 rgba(255, 255, 255, 0.45);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.btn-primary:active:not(:disabled) {
+  box-shadow: 0 2px 0 var(--ac-green-d), inset 0 2px 0 rgba(255, 255, 255, 0.4);
+}
+
+.btn-secondary {
+  color: #14495F;
+  background: linear-gradient(180deg, #A9E2F7, var(--ac-water));
+  border-color: var(--ac-water-d);
+  box-shadow: 0 5px 0 var(--ac-water-d), inset 0 2px 0 rgba(255, 255, 255, 0.5);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+.btn-secondary:active:not(:disabled) {
+  box-shadow: 0 2px 0 var(--ac-water-d), inset 0 2px 0 rgba(255, 255, 255, 0.45);
+}
+
+.btn-ghost { background: linear-gradient(180deg, #FFFFFF, #F8EFDB); }
+.btn-ghost.is-muted { color: var(--ink-faint); background: #F3ECDD; }
+
+.btn:disabled {
+  color: #8A7A63;
+  background: #EFE7D6;
+  border-color: #DED2B9;
+  box-shadow: 0 3px 0 #DDD1B7, inset 0 2px 0 rgba(255, 255, 255, 0.6);
+  cursor: not-allowed;
+}
+
+/* ---------- 难度设置面板 ---------- */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px 24px;
+  max-width: 1100px;
+  margin: 0 auto 22px;
+  padding: 16px 22px;
+}
+.controls.panel::before { border-radius: 20px; }
+.control-group { display: flex; align-items: center; gap: 10px; }
+.control-label {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--ac-brown);
+  white-space: nowrap;
+}
+.control-group-actions { flex-wrap: wrap; justify-content: center; gap: 10px; }
+
+/* 分段选择器（像动森里切换标签） */
+.segmented {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  background: #F0E4C8;
+  border: 2px solid var(--ac-tan);
+  border-radius: 999px;
+  box-shadow: inset 0 2px 5px rgba(150, 120, 70, 0.16);
+}
+.segmented button {
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  color: #6B5A45;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  padding: 5px 16px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+.segmented button:hover { color: var(--ac-green-text); }
+.segmented button.active {
+  color: var(--ac-green-text);
+  background: linear-gradient(180deg, #FFFEF8, #FFF6DF);
+  border-color: var(--ac-tan-2);
+  box-shadow: 0 3px 0 var(--ac-tan-3), inset 0 2px 0 #ffffff;
+  transform: translateY(-1px);
+}
+
+/* ---------- 主区域 ---------- */
+.game-area {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: clamp(16px, 3vw, 34px);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.board-column {
+  flex: 1 1 auto;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* ---------- 货架（木板 + 纸卡） ---------- */
+.shelf {
+  position: relative;
+  width: 100%;
+  padding: 16px clamp(10px, 3vw, 26px) 22px;
+  background: linear-gradient(180deg, #FFFEF8 0%, var(--ac-cream) 45%, var(--ac-cream-2) 100%);
+  border: 3px solid var(--ac-tan-2);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+.shelf::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 2px dashed var(--ac-tan);
+  border-radius: calc(var(--radius-lg) - 9px);
+  pointer-events: none;
+}
+.shelf-row-label {
+  display: block;
+  width: fit-content;
+  margin: 2px auto 10px;
+  padding: 4px 14px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ac-brown);
+  background: var(--ac-cream-3);
+  border: 2px solid var(--ac-tan);
+  border-radius: 999px;
+}
+.shelf-divider {
+  height: 0;
+  margin: 14px 0;
+  border-top: 3px dashed var(--ac-tan-2);
+}
+.slot-row, .back-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: var(--slot-gap);
+}
+.slot {
+  position: relative;
+  width: var(--bottle-w);
+  aspect-ratio: 3 / 5;
+  padding: 3px;
+  border-radius: var(--radius-sm);
+}
+.slot svg, .back-cell svg, .pool-bottle svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.slot-filled { cursor: grab; touch-action: none; }
+.slot-filled:active { cursor: grabbing; }
+.slot-filled.dragging-source { opacity: 0.35; }
+.back-cell {
+  width: var(--bottle-w);
+  aspect-ratio: 3 / 5;
+}
+.empty-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink-soft);
+  background: repeating-linear-gradient(
+    45deg,
+    #F3ECDD 0 6px,
+    #EFE6D2 6px 12px
+  );
+  border: 2px dashed var(--ac-tan-2);
+  border-radius: var(--radius-sm);
+}
+
+/* 木搁板 */
+.shelf-plank {
+  position: relative;
+  height: 18px;
+  margin-top: 12px;
+  border-radius: 10px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.16) 0 3px,
+      rgba(255, 255, 255, 0) 3px 26px
+    ),
+    linear-gradient(180deg, #EBBE7E 0%, #DBA75F 55%, #C98C45 100%);
+  border: 2px solid #B47F3C;
+  box-shadow: 0 6px 0 #A97631, 0 12px 18px rgba(122, 90, 56, 0.22),
+    inset 0 2px 0 rgba(255, 255, 255, 0.5);
+}
+/* 搁板两端的圆头（木料收边） */
+.shelf-plank::before,
+.shelf-plank::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 12px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #E6B673, #C9903F);
+  border: 2px solid #B47F3C;
+}
+.shelf-plank::before { left: -6px; }
+.shelf-plank::after { right: -6px; }
+
+/* 选中 / 拖拽高亮 */
+.slot.selected { animation: bob 0.8s ease-in-out infinite; }
+.slot.selected svg { filter: drop-shadow(0 0 7px rgba(124, 196, 78, 0.95)); }
+.pool-bottle.selected { animation: bob 0.8s ease-in-out infinite; }
+.pool-bottle.selected svg { filter: drop-shadow(0 0 7px rgba(124, 196, 78, 1)); }
+.slot.drop-hover {
+  background: rgba(124, 196, 78, 0.16);
+  box-shadow: inset 0 0 0 3px rgba(124, 196, 78, 0.55);
+}
+.slot.pop { animation: pop 0.26s ease; }
+
+/* ---------- 瓶子池（纸卡由 .panel 统一提供） ---------- */
+.pool-column {
+  flex: 0 0 auto;
+  width: clamp(200px, 26vw, 300px);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.pool-title {
+  margin: 2px 0 12px;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--ac-brown);
+  text-align: center;
+}
+.pool-title::before { content: '🍃 '; }
+.pool {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(6px, 1.6vw, 14px);
+  min-height: 96px;
+  padding: 12px;
+  background: var(--ac-cream-2);
+  border: 2px dashed var(--ac-tan-2);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 3px 8px rgba(150, 120, 70, 0.12);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.pool-bottle { width: var(--pool-bottle-w); cursor: grab; touch-action: none; }
+.pool-bottle:active { cursor: grabbing; }
+.pool-bottle.dragging-source { opacity: 0.35; }
+.pool-done { align-items: center; }
+.pool-empty-hint { color: var(--ink-soft); font-weight: 800; font-size: 14px; text-align: center; }
+.pool-tip {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+/* ---------- 信息 / 猜瓶子按钮 / 结果 ---------- */
+.placed-info {
+  min-height: 24px;
+  padding: 3px 16px;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink-soft);
+  text-align: center;
+  background: rgba(255, 252, 242, 0.9);
+  border: 2px dashed var(--ac-tan);
+  border-radius: 999px;
+}
+.btn-guess {
+  position: relative;
+  padding: 13px 40px 16px;
+  font-size: 21px;
+  color: #7A4A12;
+  background: linear-gradient(180deg, var(--ac-yellow) 0%, #FFBE47 60%, #F5A82F 100%);
+  border: 3px solid #E0912A;
+  border-radius: 999px;
+  box-shadow: 0 7px 0 var(--ac-yellow-d), 0 14px 22px rgba(217, 154, 40, 0.32),
+    inset 0 3px 0 rgba(255, 255, 255, 0.6);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+.btn-guess:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 3px 0 var(--ac-yellow-d), 0 6px 12px rgba(217, 154, 40, 0.3),
+    inset 0 3px 0 rgba(255, 255, 255, 0.5);
+}
+.btn-guess:disabled {
+  color: #8A7A63;
+  background: #EFE7D6;
+  border-color: #DED2B9;
+  box-shadow: 0 4px 0 #DDD1B7;
+  text-shadow: none;
+}
+.result {
+  min-height: 32px;
+  font-size: 22px;
+  font-weight: 800;
+  text-align: center;
+  color: #6B4E2E;
+  text-shadow: 0 2px 0 #ffffff;
+}
+.result-win { color: var(--ac-green-text); }
+.result-guess { color: #B36A0E; }
+.result-giveup { color: var(--ink-soft); font-size: 17px; }
+.result.flash { animation: pop 0.3s ease; }
+
+/* ---------- 尝试记录（纸卡由 .panel 统一提供） ---------- */
+.history {
+  max-width: 1100px;
+  margin: 24px auto 0;
+  padding: 16px 20px;
+  box-shadow: var(--shadow-sm);
+}
+.history-title {
+  margin: 2px 0 12px;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--ac-brown);
+}
+.history-title::before { content: '🍀 '; }
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.history-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: linear-gradient(180deg, #FFFDF6, var(--ac-cream-2));
+  border: 2px solid var(--ac-tan);
+  border-radius: var(--radius-sm);
+}
+.history-index { width: 36px; font-weight: 800; color: var(--ink-soft); flex: 0 0 auto; }
+.history-dots { display: flex; flex: 1; flex-wrap: nowrap; gap: 5px; }
+.dot {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px var(--ac-tan),
+    inset 0 -3px 0 rgba(90, 60, 20, 0.2), inset 0 2px 0 rgba(255, 255, 255, 0.5);
+}
+.dot-empty {
+  background: repeating-linear-gradient(45deg, #EFE6D2 0 4px, #F6EEDC 4px 8px);
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 3.5px var(--ac-tan-2);
+}
+.history-score { font-weight: 800; color: var(--ac-water-text); flex: 0 0 auto; }
+.history-win {
+  background: linear-gradient(180deg, #F2FBE6, #E4F6D2);
+  border-color: var(--ac-green);
+}
+.history-win .history-score { color: var(--ac-green-text); }
+.history-empty { padding: 12px; color: var(--ink-soft); text-align: center; font-size: 14px; }
+
+/* ---------- 成绩排行榜（纸卡由 .panel 统一提供） ---------- */
+.ranking {
+  max-width: 1100px;
+  margin: 24px auto 0;
+  padding: 16px 20px;
+  box-shadow: var(--shadow-sm);
+}
+.ranking-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0 12px;
+}
+.ranking-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--ac-brown);
+}
+.ranking-title::before { content: '🏆 '; }
+.ranking-rule {
+  padding: 3px 12px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ac-brown);
+  background: var(--ac-cream-3);
+  border: 2px dashed var(--ac-tan);
+  border-radius: 999px;
+}
+.ranking-head .btn {
+  margin-left: auto;
+  padding: 6px 15px 8px;
+  font-size: 14px;
+}
+
+/* 汇总条：共几局 / 成功几次 / 最快几回 */
+.ranking-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.ranking-chip {
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ac-brown);
+  background: linear-gradient(180deg, #FFFDF6, var(--ac-cream-2));
+  border: 2px solid var(--ac-tan);
+  border-radius: 999px;
+}
+.ranking-chip b { color: var(--ac-green-text); }
+.ranking-chip.is-best b { color: #B36A0E; }
+.ranking-chip.is-hint {
+  color: var(--ink-soft);
+  background: #F3ECDD;
+  border-style: dashed;
+}
+
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 264px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.ranking-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: linear-gradient(180deg, #FFFDF6, var(--ac-cream-2));
+  border: 2px solid var(--ac-tan);
+  border-radius: var(--radius-sm);
+}
+/* 前三名：给一点「奖牌台」的暖色 */
+.ranking-row.is-top {
+  background: linear-gradient(180deg, #FFF9E4, #FDF0C8);
+  border-color: var(--ac-tan-3);
+}
+.ranking-row.is-latest {
+  animation: pop 0.32s ease;
+  box-shadow: 0 0 0 3px rgba(124, 196, 78, 0.5);
+}
+
+.rank-medal {
+  flex: 0 0 auto;
+  width: 34px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+.rank-guesses {
+  flex: 0 0 auto;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--ac-brown);
+}
+.rank-guesses b {
+  font-size: 21px;
+  color: #B36A0E;
+}
+.rank-success {
+  flex: 0 0 auto;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ac-green-text);
+}
+.rank-success.is-miss { color: var(--ink-soft); }
+.rank-diff {
+  flex: 0 0 auto;
+  padding: 2px 9px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ac-brown);
+  background: var(--ac-cream-3);
+  border: 2px solid var(--ac-tan);
+  border-radius: 999px;
+}
+.rank-time {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.ranking-empty {
+  padding: 12px;
+  font-size: 14px;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+/* ---------- 拖拽幽灵 ---------- */
+.ghost-layer { position: fixed; inset: 0; z-index: 999; pointer-events: none; }
+.ghost-bottle {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: var(--bottle-w);
+  pointer-events: none;
+  transform: translate(-50%, -62%) rotate(-6deg) scale(1.12);
+  filter: drop-shadow(0 10px 14px rgba(122, 90, 56, 0.4));
+  opacity: 0.96;
+}
+.ghost-bottle svg { display: block; width: 100%; height: auto; }
+
+/* ---------- 庆祝彩带（落叶与花瓣） ---------- */
+.confetti-layer { position: fixed; inset: 0; z-index: 1100; overflow: hidden; pointer-events: none; }
+.confetti {
+  position: absolute;
+  top: -24px;
+  width: 10px;
+  height: 16px;
+  border-radius: 40% 40% 45% 45%;
+  animation-name: confetti-fall;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+/* ---------- 弹窗：动森对话框 ---------- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(90, 73, 54, 0.32);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+.overlay.show { display: flex; }
+.overlay-card {
+  position: relative;
+  max-width: 440px;
+  padding: 30px 34px 26px;
+  text-align: center;
+  background: linear-gradient(180deg, #FFFEF8 0%, var(--ac-cream) 45%, var(--ac-cream-2) 100%);
+  border: 4px solid var(--ac-tan-2);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 0 var(--ac-tan-4), 0 24px 50px rgba(90, 73, 54, 0.34);
+  animation: pop 0.35s ease;
+}
+.overlay-card::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 2px dashed var(--ac-tan);
+  border-radius: calc(var(--radius-lg) - 10px);
+  pointer-events: none;
+}
+.overlay-emoji { font-size: 58px; line-height: 1; }
+.overlay-card h2 {
+  margin: 10px 0 10px;
+  color: #6B4E2E;
+  font-size: 26px;
+  text-shadow: 0 2px 0 #ffffff;
+}
+.overlay-card p { margin: 0 0 20px; color: var(--ink-soft); font-size: 17px; font-weight: 700; }
+.overlay-card p b { color: var(--ac-green-d); }
+/* 胜利弹窗里的「这局排第 N 名」小徽章 */
+.overlay-card p.overlay-rank {
+  display: inline-block;
+  margin: -6px 0 18px;
+  padding: 5px 14px;
+  font-size: 15px;
+  color: var(--ac-brown);
+  background: var(--ac-cream-3);
+  border: 2px dashed var(--ac-tan);
+  border-radius: 999px;
+}
+.overlay-card .btn { margin: 4px 6px 0; }
+
+/* ---------- 提示 toast ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 40px;
+  z-index: 1300;
+  padding: 11px 22px;
+  border-radius: 999px;
+  font-weight: 800;
+  color: #FFFCF2;
+  background: linear-gradient(180deg, #8A6A46, #6B4E2E);
+  border: 2px solid #5E452B;
+  box-shadow: 0 5px 0 #4F3A24, 0 12px 22px rgba(90, 73, 54, 0.3);
+  opacity: 0;
+  transform: translate(-50%, 20px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------- 猜瓶子动画（放大镜「看破答案」） ---------- */
+.shelf.guessing .slot-row .bottle-svg,
+.shelf.guessing .back-row .bottle-svg {
+  animation: bottle-wobble 0.5s ease;
+}
+.shelf.guessing::after {
+  content: '🔍';
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  font-size: 46px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.4);
+  animation: guess-pop 0.5s ease;
+}
+
+/* ---------- 关键帧 ---------- */
+@keyframes pop {
+  0% { transform: scale(0.6); }
+  60% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+@keyframes bob {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-8px) scale(1.04); }
+}
+@keyframes bottle-wobble {
+  0% { transform: rotate(0); }
+  20% { transform: rotate(-6deg) translateY(2px); }
+  45% { transform: rotate(5deg) translateY(3px); }
+  70% { transform: rotate(-3deg); }
+  100% { transform: rotate(0); }
+}
+@keyframes guess-pop {
+  0% { opacity: 0; transform: translate(-50%, -150%) scale(0.5) rotate(-14deg); }
+  45% { opacity: 1; transform: translate(-50%, -50%) scale(1.4) rotate(6deg); }
+  70% { opacity: 1; transform: translate(-50%, -50%) scale(1.15) rotate(6deg); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.3) rotate(6deg); }
+}
+@keyframes confetti-fall {
+  0% { transform: translateY(-24px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(106vh) rotate(720deg); opacity: 0.9; }
+}
+@keyframes leaf-sway {
+  0%, 100% { transform: translate(0, 0) rotate(-8deg); }
+  50% { transform: translate(8px, 12px) rotate(10deg); }
+}
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 900px) {
+  .game-area { flex-direction: column; align-items: stretch; }
+  .board-column { max-width: 100%; }
+  .pool-column { width: 100%; }
+}
+@media (max-width: 520px) {
+  /* 窄屏：时间另起一行右对齐，避免把「次数 / 成功」挤到换行 */
+  .ranking-row { gap: 8px; padding: 8px 12px; }
+  .rank-time { margin-left: 34px; }
+  .rank-medal { width: 26px; }
+}
+@media (max-width: 420px) {
+  :root {
+    --bottle-w: clamp(28px, 9vw, 46px);
+    --pool-bottle-w: clamp(34px, 13vw, 54px);
+    --slot-gap: 3px;
+  }
+  .controls { gap: 10px 14px; padding: 14px 16px; }
+  .control-label { font-size: 14px; }
+  .segmented button { padding: 5px 12px; }
+  .btn { font-size: 15px; padding: 8px 15px 10px; }
+  .btn-guess { font-size: 19px; padding: 12px 30px 15px; }
+  .result { font-size: 19px; }
+  .shelf { padding: 14px 12px 18px; }
+  .hill-back { height: 110px; }
+  .hill-front { height: 86px; }
+  .ranking { padding: 14px 14px; }
+  .ranking-head { gap: 8px; }
+  .ranking-head .btn { margin-left: 0; }
+  .rank-guesses b { font-size: 19px; }
+  .rank-time { margin-left: 26px; font-size: 12px; }
+}
+
+/* ---------- 无障碍：尊重「减少动态效果」 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

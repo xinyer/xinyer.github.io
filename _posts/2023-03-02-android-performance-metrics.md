@@ -84,7 +84,7 @@ Android 使用初始显示时间（TTID）和完全显示时间（TTFD）指标�
 
 如果 Android 应用的界面线程处于阻塞状态的时间过长，会触发“应用无响应”(ANR) 错误。如果应用位于前台，系统会向用户显示一个对话框，如下所示。ANR 对话框会为用户提供强制退出应用的选项。
 
-<img src="/assets/images/metrics-anr.png" width="50%" />
+<img src="/assets/images/metrics-anr.png" width="50%" alt="ANR 无响应对话框" />
 
 ### 5. 崩溃（Crash）
 > 只要出现未处理的异常或信号导致的意外退出，Android 应用就会崩溃。
