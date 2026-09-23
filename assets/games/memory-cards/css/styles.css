@@ -35,6 +35,17 @@
   --sky-accent: #84c5e8;
   --wrong: #ef6b5c;
 
+  /* —— 卡牌背面（默认 = 简单难度：草地绿） ——
+     难度配色由下方 html[data-mode] 覆盖，JS 只需在 <html> 上写一个属性。
+     四个主色 + 三个由主色派生的阴影/描边色都必须显式给出：
+     这里不用 color-mix()，老版本 WebView（微信内置浏览器）不支持。 */
+  --back-top: #a6e184;
+  --back-mid: #8ad365;
+  --back-deep: #6bbb4c;
+  --back-inset: rgba(60, 120, 40, .22);
+  --back-drop: rgba(60, 120, 40, .9);
+  --back-emblem: rgba(85, 156, 58, .2);
+
   /* —— 尺寸：同时受宽与高约束，矮屏才不会把内容顶出视口 —— */
   --card: clamp(76px, min(23vw, 16vh), 118px);
   --radius-card: clamp(14px, 3.4vw, 20px);
@@ -42,6 +53,31 @@
 
   --font: ui-rounded, "SF Pro Rounded", "Hiragino Maru Gothic ProN", "Quicksand",
           "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+}
+
+/* ---------------------------------------------- 难度换色
+   三档难度各一套卡牌背面配色，一眼就能看出在玩哪一档：
+     简单 easy —— 草地绿（默认，见 :root）
+     困难 hard —— 蜜橙琥珀
+     地狱 hell —— 珊瑚红
+   只覆盖背面那几个变量，牌面（--paper 那套）和场景草地（--grass-*）都不受影响。 */
+
+html[data-mode="hard"] {
+  --back-top: #ffdc99;
+  --back-mid: #ffc46b;
+  --back-deep: #efa63f;
+  --back-inset: rgba(150, 95, 20, .2);
+  --back-drop: rgba(150, 95, 20, .85);
+  --back-emblem: rgba(204, 131, 36, .24);
+}
+
+html[data-mode="hell"] {
+  --back-top: #ffb2a2;
+  --back-mid: #ff8d78;
+  --back-deep: #ee6b52;
+  --back-inset: rgba(150, 55, 35, .22);
+  --back-drop: rgba(150, 55, 35, .85);
+  --back-emblem: rgba(201, 78, 55, .26);
 }
 
 /* ---------------------------------------------- reset */
@@ -482,6 +518,51 @@ button {
 /* =========================================================
    3. 牌桌 & 卡片
    ========================================================= */
+/* ---------------------------------------------- 游戏页内的难度切换 */
+/* 不用打开选角页也能换难度；小圆点用的 tone 与选角页 .mode__dot 同源 */
+.difficulty {
+  display: flex;
+  gap: 5px;
+  padding: 5px;
+  border-radius: 999px;
+  background: rgba(184, 158, 124, .22);
+}
+
+.diff {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 13px;
+  border-radius: 999px;
+  font-size: clamp(12px, 3.4vw, 13.5px);
+  font-weight: 800;
+  color: var(--ink-soft);
+  transition: color .2s ease, background-color .24s ease,
+              box-shadow .2s ease, transform .16s ease;
+}
+
+.diff:hover { color: var(--ink); }
+
+.diff:active { transform: translateY(2px); }
+
+.diff.is-active {
+  color: var(--ink);
+  background: linear-gradient(180deg, #fffdf6, #fff3d8);
+  box-shadow:
+    0 3px 0 0 var(--gold-deep),
+    0 0 0 2.5px rgba(255, 209, 102, .5);
+}
+
+.diff:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+.diff__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tone, var(--mint));
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .95);
+}
+
 .playfield {
   padding: clamp(12px, 2.2vh, 20px);
   border-radius: clamp(26px, 6vw, 38px);
@@ -561,17 +642,17 @@ button {
   overflow: hidden;
 }
 
-/* 背面（未翻开）—— 草地绿砖块 */
+/* 背面（未翻开）—— 砖块质感，配色随难度变化（--back-* 见文件顶部） */
 .card__face--back {
   background:
     radial-gradient(circle at 50% 26%, rgba(255, 255, 255, .34) 0%, rgba(255, 255, 255, 0) 62%),
-    linear-gradient(180deg, var(--grass-top) 0%, var(--grass-mid) 56%, var(--grass-deep) 100%);
+    linear-gradient(180deg, var(--back-top) 0%, var(--back-mid) 56%, var(--back-deep) 100%);
   border: 3px solid rgba(255, 255, 255, .82);
   box-shadow:
-    0 6px 0 0 var(--grass-deep),
+    0 6px 0 0 var(--back-deep),
     0 6px 0 3px rgba(255, 255, 255, .5),
-    0 14px 20px -14px rgba(60, 120, 40, .9),
-    inset 0 -5px 12px rgba(60, 120, 40, .22);
+    0 14px 20px -14px var(--back-drop),
+    inset 0 -5px 12px var(--back-inset);
   transition: transform .16s ease, box-shadow .16s ease;
 }
 
@@ -593,7 +674,7 @@ button {
   inset: 22%;
   border-radius: 50%;
   background: rgba(255, 255, 255, .9);
-  box-shadow: inset 0 -3px 0 rgba(85, 156, 58, .2);
+  box-shadow: inset 0 -3px 0 var(--back-emblem);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M5.5 26.5C5.5 14 14 5.5 26.5 5.5c0 12.5-8.5 21-21 21z' fill='%23000'/%3E%3C/svg%3E") center / 104% no-repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M5.5 26.5C5.5 14 14 5.5 26.5 5.5c0 12.5-8.5 21-21 21z' fill='%23000'/%3E%3C/svg%3E") center / 104% no-repeat;
   transform: rotate(-12deg) ;
@@ -721,10 +802,10 @@ button {
   }
   .card:not(.is-open):hover .card__face--back {
     box-shadow:
-      0 10px 0 0 var(--grass-deep),
+      0 10px 0 0 var(--back-deep),
       0 10px 0 3px rgba(255, 255, 255, .5),
-      0 22px 26px -16px rgba(60, 120, 40, .95),
-      inset 0 -5px 12px rgba(60, 120, 40, .22);
+      0 22px 26px -16px var(--back-drop),
+      inset 0 -5px 12px var(--back-inset);
   }
 }
 
@@ -1276,6 +1357,23 @@ button {
   background: linear-gradient(180deg, #ffe9a8, var(--gold));
   border: 1.5px solid #fff;
 }
+
+/* 难度标签（榜单全难度混排后，每条成绩要标明来自哪一档） */
+.board__diff {
+  flex: none;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 9.5px;
+  font-weight: 800;
+  line-height: 1.5;
+  white-space: nowrap;
+  color: #5a4630;
+  background: rgba(126, 208, 176, .55);   /* 简单 = 薄荷，与 .mode__dot 同源 */
+  border: 1.5px solid #fff;
+}
+
+.board__diff[data-mode="hard"] { background: rgba(255, 196, 107, .6); }
+.board__diff[data-mode="hell"] { background: rgba(255, 122, 107, .55); }
 
 .board__sub {
   font-size: clamp(10px, 2.8vw, 11px);

@@ -1,8 +1,11 @@
 /* =========================================================
    leaderboard.js — 排行榜数据层（localStorage 持久化）
    ---------------------------------------------------------
-   ⚠️ 成绩按「难度模式」隔离：简单模式 12 秒和地狱模式 12 秒不是一回事，
-      混在一张榜上没有可比性。所以存储结构多了一层模式维度。
+   存储仍然按「难度模式」隔离 —— 一条成绩到底是在哪档难度下打出来的，
+   这个信息不能丢，榜单上要靠它显示难度标签。
+
+   但**榜单本身是全难度混排的**：同一个角色在三档难度下可能各有一条记录，
+   上榜时只取其中最优的那一条，并带上它来自哪个难度（row.mode）。
 
    每个角色在每个模式下分别保留两条「个人最佳」：
      · bestTime —— 最快通关用时（毫秒）
@@ -118,19 +121,42 @@ window.Leaderboard = (function () {
     return data[m];
   }
 
-  /* 把记录整理成榜单行，再按 compare 排序 */
-  function rowsFrom(mode, field, compare) {
-    var data = load();
-    var bucket = data[normalizeMode(mode)] || {};
-    var rows = [];
+  /* —— 两种排序规则，聚合与排序共用同一套，避免两处判断漂移 —— */
+  function cmpTime(a, b) { return (a.ms - b.ms) || (a.misses - b.misses); }
+  function cmpMiss(a, b) { return (a.misses - b.misses) || (a.ms - b.ms); }
 
-    Object.keys(bucket).forEach(function (id) {
-      var rec = bucket[id] && bucket[id][field];
-      if (rec && typeof rec.ms === 'number') {
-        rows.push({ id: id, ms: rec.ms, misses: rec.misses, at: rec.at });
-      }
+  /**
+   * 跨难度收集榜单行
+   *
+   * 遍历所有难度，把每个角色的记录都摊平成候选行；
+   * 同一角色命中多条时，按 compare 只留最优的一条 ——
+   * 留下的那条自带 mode 字段，榜单上据此显示难度标签。
+   *
+   * @param {string}   field    'bestTime' | 'bestMiss'
+   * @param {function} compare  排序/择优规则
+   * @param {string=}  onlyMode 只统计某一档难度（不传 = 全难度混排）
+   */
+  function collect(field, compare, onlyMode) {
+    var data = load();
+    var best = {};   // id → 该角色当前最优的一条
+
+    var modes = onlyMode ? [normalizeMode(onlyMode)] : MODES;
+
+    modes.forEach(function (mode) {
+      var bucket = data[mode];
+      if (!bucket || typeof bucket !== 'object') return;
+
+      Object.keys(bucket).forEach(function (id) {
+        var rec = bucket[id] && bucket[id][field];
+        if (!rec || typeof rec.ms !== 'number') return;
+
+        var row = { id: id, ms: rec.ms, misses: rec.misses, at: rec.at, mode: mode };
+        var cur = best[id];
+        if (!cur || compare(row, cur) < 0) best[id] = row;
+      });
     });
 
+    var rows = Object.keys(best).map(function (id) { return best[id]; });
     rows.sort(compare);
     return rows;
   }
@@ -188,18 +214,30 @@ window.Leaderboard = (function () {
       return improved;
     },
 
-    /** 用时榜：快的在前，同用时失误少的在前 */
+    /**
+     * 用时榜：快的在前，同用时失误少的在前
+     * 不传 mode = 全难度混排（每个角色取三档里最优的一条）
+     */
     rankingTime: function (mode) {
-      return rowsFrom(mode, 'bestTime', function (a, b) {
-        return a.ms - b.ms || a.misses - b.misses;
-      });
+      return collect('bestTime', cmpTime, mode);
     },
 
-    /** 失误榜：失误少的在前，同失误用时短的在前 */
+    /** 失误榜：失误少的在前，同失误用时短的在前（同样默认全难度混排） */
     rankingMiss: function (mode) {
-      return rowsFrom(mode, 'bestMiss', function (a, b) {
-        return a.misses - b.misses || a.ms - b.ms;
-      });
+      return collect('bestMiss', cmpMiss, mode);
+    },
+
+    /**
+     * 某个角色跨难度的最佳成绩
+     * 返回 { time: row|null, miss: row|null }，两条各自带 mode 字段
+     * （时间和失误的最优可能来自不同难度，所以不能合成一条）
+     */
+    bestOf: function (id) {
+      if (!id) return { time: null, miss: null };
+      return {
+        time: collect('bestTime', cmpTime).filter(function (r) { return r.id === id; })[0] || null,
+        miss: collect('bestMiss', cmpMiss).filter(function (r) { return r.id === id; })[0] || null
+      };
     },
 
     /** 清空某个模式（不传则清空全部） */

@@ -240,6 +240,7 @@
     var boardEmptyEl = $('boardEmpty');
     var boardHintEl = $('boardHint');
     var tabsEl = document.querySelector('.tabs');
+    var difficultyEl = $('difficulty');
 
     /* ---------- 角色 & 排行榜 ---------- */
     var characters = window.CHARACTERS || [];
@@ -248,7 +249,9 @@
     characters.forEach(function (c) { charById[c.id] = c; });
 
     var lastRole = readLastRole();
-    var currentId = (lastRole && charById[lastRole]) ? lastRole : (characters[0] && characters[0].id);
+    /* 只有"记住的星球确实还在"才算数，否则视为第一次来 */
+    var hasSavedRole = !!(lastRole && charById[lastRole]);
+    var currentId = hasSavedRole ? lastRole : (characters[0] && characters[0].id);
 
     var PROB = window.Problems;
     var lastMode = readLastMode();
@@ -272,16 +275,19 @@
     /* =======================================================
        角色
        ======================================================= */
+    /* 角色卡上的「个人最佳」：跨难度取最优。
+       这里只写用时 —— 角色卡那一行只有 ~63px 宽，再挂难度名会被省略号截断；
+       难度标签统一放在榜单条目上（.board__diff）。 */
     function bestLabel(rec) {
-      if (rec && rec.bestTime) return '最快 ' + formatTime(rec.bestTime.ms, true);
-      return '还没挑战过';
+      if (rec) return '最快 ' + formatTime(rec.ms, true);
+      return '暂无成绩';   // 「还没挑战过」5 个字会被这一行的宽度截成「还没挑…」
     }
 
     function renderRoles() {
       rolesEl.innerHTML = '';
 
       characters.forEach(function (ch, i) {
-        var rec = board.get(currentMode, ch.id);
+        var rec = board.bestOf(ch.id).time;
         var btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'role' + (ch.id === currentId ? ' is-active' : '');
@@ -316,7 +322,7 @@
 
       // 顺手刷新卡片上的个人最佳
       characters.forEach(function (ch, idx) {
-        var rec = board.get(currentMode, ch.id);
+        var rec = board.bestOf(ch.id).time;
         var best = rolesEl.querySelectorAll('.role')[idx];
         if (best) best.querySelector('.role__best').textContent = bestLabel(rec);
       });
@@ -326,38 +332,81 @@
     }
 
     /* ---------- 难度模式 ---------- */
-    function renderModes() {
-      modesEl.innerHTML = '';
-
-      PROB.MODES.forEach(function (m) {
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'mode' + (m.id === currentMode ? ' is-active' : '');
-        btn.dataset.mode = m.id;
-        btn.setAttribute('role', 'radio');
-        btn.setAttribute('aria-checked', String(m.id === currentMode));
-        btn.innerHTML =
-          '<span class="mode__dot" style="--tone:' + m.tone + '"></span>' +
-          '<span class="mode__name">' + m.name + '</span>' +
-          '<span class="mode__desc">' + m.desc + '</span>';
-        modesEl.appendChild(btn);
+    /**
+     * 两组难度控件（选角页的大卡、游戏页的分段控件）都**只建一次 DOM**，
+     * 之后靠切 is-active 同步。
+     * ⚠️ 不要每次切换都 innerHTML = '' 重建：正在按的那颗按钮会被换成新节点，
+     * 键盘焦点直接掉回 body，鼠标按住的状态也会断。
+     */
+    function syncModeActive() {
+      [[modesEl, '.mode'], [difficultyEl, '.diff']].forEach(function (pair) {
+        var nodes = pair[0].querySelectorAll(pair[1]);
+        for (var i = 0; i < nodes.length; i++) {
+          var on = nodes[i].dataset.mode === currentMode;
+          nodes[i].classList.toggle('is-active', on);
+          nodes[i].setAttribute('aria-checked', String(on));
+        }
       });
     }
 
+    /* 选角页里的大号难度卡 */
+    function renderModes() {
+      if (modesEl.children.length !== PROB.MODES.length) {
+        modesEl.innerHTML = '';
+
+        PROB.MODES.forEach(function (m) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'mode';
+          btn.dataset.mode = m.id;
+          btn.setAttribute('role', 'radio');
+          btn.innerHTML =
+            '<span class="mode__dot" style="--tone:' + m.tone + '"></span>' +
+            '<span class="mode__name">' + m.name + '</span>' +
+            '<span class="mode__desc">' + m.desc + '</span>';
+          modesEl.appendChild(btn);
+        });
+      }
+    }
+
+    /* 游戏页里的紧凑分段控件（不打开选角页也能换难度） */
+    function renderDifficulty() {
+      if (difficultyEl.children.length !== PROB.MODES.length) {
+        difficultyEl.innerHTML = '';
+
+        PROB.MODES.forEach(function (m) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'diff';
+          btn.dataset.mode = m.id;
+          btn.setAttribute('role', 'radio');
+          btn.title = m.name + ' · ' + m.desc;
+          btn.innerHTML =
+            '<span class="diff__dot" style="--tone:' + m.tone + '"></span>' +
+            '<span>' + m.name + '</span>';
+          difficultyEl.appendChild(btn);
+        });
+      }
+    }
+
+    /* 难度的所有「声明式」界面一次刷齐：
+       卡牌背面配色（data-mode → CSS）、页内分段控件、选角页难度卡 */
+    function syncModeUI() {
+      document.documentElement.dataset.mode = currentMode;
+      renderModes();
+      renderDifficulty();
+      syncModeActive();
+    }
+
+    /* 只改状态与界面；本局要不要重洗由调用方决定 */
     function selectMode(id) {
       if (!PROB.isMode(id) || id === currentMode) return;
 
       currentMode = id;
       writeLastMode(id);
+      syncModeUI();
 
-      var nodes = modesEl.querySelectorAll('.mode');
-      for (var i = 0; i < nodes.length; i++) {
-        var on = nodes[i].dataset.mode === id;
-        nodes[i].classList.toggle('is-active', on);
-        nodes[i].setAttribute('aria-checked', String(on));
-      }
-
-      // 成绩是按模式分开存的，切换后角色卡上的最佳成绩与下方榜单都要跟着换
+      // 存储里成绩仍按难度分开记，但角色卡上的最佳是跨难度取最优，可能因此变化
       renderRoles();
       renderBoard(boardType);
     }
@@ -410,12 +459,12 @@
     function renderBoard(type) {
       boardType = (type === 'miss') ? 'miss' : 'time';
 
-      var modeInfo = PROB.mode(currentMode);
-      boardModeEl.textContent = modeInfo.name;
+      // 榜单不再按难度分组：每个角色取三档里最优的一条，行上标出它来自哪档
+      boardModeEl.textContent = '全部难度';
 
       var rows = (boardType === 'time')
-        ? board.rankingTime(currentMode)
-        : board.rankingMiss(currentMode);
+        ? board.rankingTime()
+        : board.rankingMiss();
 
       // tab 状态
       var tabs = tabsEl.querySelectorAll('.tab');
@@ -429,21 +478,22 @@
 
       if (!rows.length) {
         boardEmptyEl.hidden = false;
-        boardEmptyEl.textContent = modeInfo.name + '模式还没有成绩，先去挑战一次吧';
+        boardEmptyEl.textContent = '还没有成绩，先去挑战一次吧';
         boardHintEl.textContent = '';
         return;
       }
 
       boardEmptyEl.hidden = true;
       boardHintEl.textContent = (boardType === 'time')
-        ? '按每个星球的最快通关用时排序'
-        : '按每个星球的最少失误次数排序';
+        ? '三档难度混排，按每个星球的最快用时排序（难度见标签）'
+        : '三档难度混排，按每个星球的最少失误排序（难度见标签）';
 
       rows.forEach(function (row, i) {
         var ch = charById[row.id];
         if (!ch) return;
 
         var isMe = (row.id === currentId);
+        var rowMode = PROB.mode(row.mode);
 
         var li = document.createElement('li');
         li.className = 'board__row';
@@ -466,6 +516,9 @@
           '<span class="board__meta">' +
             '<span class="board__nameline">' +
               '<strong class="board__name">' + ch.name + '</strong>' +
+              '<span class="board__diff" data-mode="' + rowMode.id + '">' +
+                rowMode.name +
+              '</span>' +
               (isMe ? '<span class="board__you">你</span>' : '') +
             '</span>' +
             '<span class="board__sub">' + sub + '</span>' +
@@ -855,6 +908,19 @@
       selectMode(mode.dataset.mode);
     });
 
+    // 游戏页内的难度切换：换难度必须重洗本局，
+    // 否则牌面还是按旧难度生成的，新旧算式会混在一局里
+    difficultyEl.addEventListener('click', function (e) {
+      var btn = e.target.closest('.diff');
+      if (!btn) return;
+      if (!PROB.isMode(btn.dataset.mode) || btn.dataset.mode === currentMode) return;
+
+      onFirstInteraction();
+      sfx('select');
+      selectMode(btn.dataset.mode);
+      game.reset();
+    });
+
     startBtn.addEventListener('click', function () {
       onFirstInteraction();
       sfx('tap');
@@ -921,17 +987,18 @@
     }
 
     applyRole();
-    renderModes();
+    syncModeUI();   // 难度相关的界面 + 卡牌背面配色，必须在建牌之前定下来
     game.reset();
     renderRoles();
 
     /* ---------------------------------------------------------
        URL 调试脚手架：一键进入某个状态，便于截图取证与回归
-         ?role=mars        指定角色
-         ?screen=select    打开选角页
+         ?role=mars        指定角色（视同已选好，跳过选角页）
+         ?screen=select    强制打开选角页
          ?screen=board     打开排行榜
+         ?screen=game      强制跳过选角页、直接开局
          ?board=miss       排行榜切到「最少失误」
-         ?seed=1           注入示例成绩（只在没有记录时）
+         ?seed=1           注入示例成绩（三档难度都铺，用于全难度混排的截图/回归）
          ?open=0,4,8       只翻开指定位置的卡片（纯视觉）
          ?wrong=7          先正确翻 1、2，再故意点错
          ?win=1            按 1→9 直接通关
@@ -946,24 +1013,64 @@
     }
 
     if (params.has('seed')) {
-      board.seed(currentMode, [
-        { id: 'sun',     ms: 9850,  misses: 0 },
-        { id: 'mercury', ms: 14200, misses: 2 },
-        { id: 'venus',   ms: 17640, misses: 1 },
-        { id: 'earth',   ms: 11300, misses: 1 },
-        { id: 'mars',    ms: 12880, misses: 0 },
-        { id: 'jupiter', ms: 21500, misses: 3 },
-        { id: 'saturn',  ms: 16240, misses: 2 },
-        { id: 'uranus',  ms: 26400, misses: 4 },
-        { id: 'neptune', ms: 19930, misses: 2 },
-        { id: 'moon',    ms: 23110, misses: 3 }
-      ]);
+      // 榜单现在是全难度混排，示例成绩也要铺满三档 ——
+      // 而且刻意让「谁最强」随难度变化，这样榜首的难度标签才会出现三种，
+      // 一眼就能看出标签是不是真的跟着数据在走（全塞简单档就会清一色「简单」）
+      var SEED_ROWS = {
+        easy: [
+          { id: 'sun',     ms: 12000, misses: 0 },
+          { id: 'mercury', ms: 9500,  misses: 1 },
+          { id: 'venus',   ms: 14000, misses: 2 },
+          { id: 'earth',   ms: 10500, misses: 1 },
+          { id: 'mars',    ms: 12880, misses: 0 },
+          { id: 'jupiter', ms: 21000, misses: 3 },
+          { id: 'saturn',  ms: 16000, misses: 2 },
+          { id: 'uranus',  ms: 11000, misses: 1 },
+          { id: 'neptune', ms: 19900, misses: 2 },
+          { id: 'moon',    ms: 23100, misses: 3 }
+        ],
+        hard: [
+          { id: 'sun',     ms: 11500, misses: 1 },
+          { id: 'mercury', ms: 13000, misses: 2 },
+          { id: 'venus',   ms: 12200, misses: 1 },
+          { id: 'earth',   ms: 16000, misses: 3 },
+          { id: 'mars',    ms: 11100, misses: 0 },
+          { id: 'jupiter', ms: 19800, misses: 2 },
+          { id: 'saturn',  ms: 14500, misses: 1 },
+          { id: 'uranus',  ms: 17200, misses: 2 },
+          { id: 'neptune', ms: 16800, misses: 1 },
+          { id: 'moon',    ms: 20500, misses: 3 }
+        ],
+        hell: [
+          { id: 'sun',     ms: 10800, misses: 2 },
+          { id: 'mercury', ms: 21000, misses: 4 },
+          { id: 'venus',   ms: 19000, misses: 3 },
+          { id: 'earth',   ms: 24000, misses: 4 },
+          { id: 'mars',    ms: 17500, misses: 2 },
+          { id: 'jupiter', ms: 15400, misses: 1 },
+          { id: 'saturn',  ms: 13900, misses: 2 },
+          { id: 'uranus',  ms: 26400, misses: 5 },
+          { id: 'neptune', ms: 13200, misses: 1 },
+          { id: 'moon',    ms: 12750, misses: 2 }
+        ]
+      };
+
+      PROB.MODES.forEach(function (m) {
+        board.seed(m.id, SEED_ROWS[m.id] || []);
+      });
+
+      // 角色卡的最佳成绩在启动时已经渲染过一轮，注入成绩后必须补刷一次，
+      // 否则截图里的角色卡会显示成「暂无成绩」，看起来像功能没生效
+      renderRoles();
     }
+
+    var rolePinned = false;   // ?role=xxx 显式指定角色时，视同「已经选好了」
 
     if (params.has('role')) {
       var rid = params.get('role');
       if (charById[rid]) {
         currentId = rid;
+        rolePinned = true;
         applyRole();
         renderRoles();
       }
@@ -1004,13 +1111,17 @@
     var autoPlay = params.has('win') || params.has('wrong');
     var wantScreen = params.get('screen');
 
+    /* 记住过星球的玩家：直接开局，不再每次刷新都挡一层选角页。
+       只有"从没选过、或记录已失效"才引导选一次。
+       想换星球随时点右上角头像 / ?screen=select。 */
+    var roleRemembered = hasSavedRole || rolePinned;
+
     if (wantScreen === 'select') {
       openScreen(selectScreen);
     } else if (wantScreen === 'board') {
       scrollToBoard();   // ?screen=board：直接滚到榜单（截图用）
-    } else if (!autoPlay && wantScreen !== 'game') {
-      // 正常流程：开局先选角色
-      openSelect();
+    } else if (!autoPlay && wantScreen !== 'game' && !roleRemembered) {
+      openSelect();      // 第一次来：先选角色
     }
 
     /* ---------------------------------------------------------
@@ -1070,22 +1181,37 @@
           }
         },
         function () {
-          // 切到地狱模式：榜单应该变空（成绩按模式隔离），牌面应该变成算式
-          selectMode('hell');
-          log.push('hellRows=' + boardListEl.querySelectorAll('.board__row').length);
-          log.push('modeLabel=' + boardModeEl.textContent);
+          // 榜单已改为全难度混排：切到地狱后旧成绩**不该**变空，
+          // 但难度标签、卡牌背色、牌面都要跟着切。这里全部走真实点击。
+          log.push('diffBtns=' + difficultyEl.querySelectorAll('.diff').length);
 
-          game.reset();
+          difficultyEl.querySelector('.diff[data-mode="hell"]').click();
+
+          var rows = boardListEl.querySelectorAll('.board__row');
+          var labels = [].map.call(rows, function (r) {
+            var el = r.querySelector('.board__diff');
+            return el ? el.textContent : '-';
+          });
+          var kinds = {};
+          labels.forEach(function (k) { kinds[k] = 1; });
+
+          log.push('hellRows=' + rows.length);
+          log.push('modeLabel=' + boardModeEl.textContent);
+          log.push('dataMode=' + document.documentElement.dataset.mode);
+          log.push('hellBackTop=' + getComputedStyle(document.documentElement)
+            .getPropertyValue('--back-top').trim());
+          log.push('diffLabelKinds=' + Object.keys(kinds).join('/'));
           log.push('hellFaces=' + [].map.call(cards, function (c) {
             return c.querySelector('.card__num').textContent;
           }).join(' '));
 
-          // 再切回简单模式，确认牌面恢复成数字
-          selectMode('easy');
-          game.reset();
+          // 再切回简单模式：牌面恢复成数字，背色回到绿
+          difficultyEl.querySelector('.diff[data-mode="easy"]').click();
           log.push('easyFaces=' + [].map.call(cards, function (c) {
             return c.querySelector('.card__num').textContent;
           }).join(' '));
+          log.push('easyBackTop=' + getComputedStyle(document.documentElement)
+            .getPropertyValue('--back-top').trim());
 
           document.title = 'SELFTEST ' + log.join(' | ');
         }
@@ -1114,6 +1240,7 @@
         var boxes = {
           signboard: box(signboardEl),
           hud: box(document.querySelector('.hud')),
+          difficulty: box(difficultyEl),
           playfield: box(playfieldEl),
           status: box(statusEl),
           grid: box(gridEl)
@@ -1250,7 +1377,15 @@
             cardWidth: getComputedStyle(cards[0]).width,
             gridCols: gcs.gridTemplateColumns,
             colGap: gcs.columnGap,
-            roleCols: getComputedStyle(rolesEl).gridTemplateColumns
+            roleCols: getComputedStyle(rolesEl).gridTemplateColumns,
+            dataMode: document.documentElement.dataset.mode,
+            backTop: rootStyle.getPropertyValue('--back-top').trim(),
+            // 卡牌背面真实渲染出来的渐变（用于确认难度换色真的生效，而不只是变量变了）
+            backFace: (function () {
+              var b = cards[0] && cards[0].querySelector('.card__face--back');
+              if (!b) return '';
+              return getComputedStyle(b).backgroundImage.replace(/\s+/g, ' ').slice(0, 96);
+            })()
           },
           vp: vw + 'x' + vh,
           boxes: boxes,
