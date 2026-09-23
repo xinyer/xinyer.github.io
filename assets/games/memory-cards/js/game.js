@@ -6,6 +6,11 @@
    · 玩家依次点击卡片，卡片翻转显示数字
    · 只有当点击出来的数字序列恰好是 1,2,3,…,9 时才算成功
    · 任何一次点错 → 所有已翻开的卡片全部翻回背面，进度清零
+
+   翻回时机（两条路径，都不会出现"点不开"的死区）：
+   a) 玩家停手 → 停留 peekMs 展示错在哪，再自动错峰翻回
+   b) 玩家抢拍 → 下一次点击立刻把已翻开的卡片全部翻回（instant），
+      并把这一次点击当成全新的第一次点击来判定
    ========================================================= */
 window.MemoryGame = (function () {
   'use strict';
@@ -75,7 +80,7 @@ window.MemoryGame = (function () {
     this.sequence = [];
     /** 失误次数 */
     this.misses = 0;
-    /** 处于错误展示期，期间不接受点击 */
+    /** 处于错误展示期：仍有待执行/已完成的翻回，下一次点击会立刻打断它 */
     this.locked = false;
     /** 是否已通关 */
     this.finished = false;
@@ -134,9 +139,14 @@ window.MemoryGame = (function () {
      返回本次结果对象，未生效则返回 null
      --------------------------------------------------------- */
   MemoryGame.prototype.pick = function (index) {
-    if (this.locked || this.finished) return null;
+    if (this.finished) return null;
     if (index < 0 || index >= this.order.length) return null;
     if (this.isOpenAt(index)) return null; // 已翻开，忽略重复点击
+
+    // 上一次点错后的"稍后翻回"还没执行，玩家就点了下一张：
+    // 不等展示计时结束，立刻把已翻开的卡片全部翻回去，然后按全新一局判定这一次点击。
+    // 这样画面永远不会出现"点了没反应"的死区。
+    if (this.locked) this._flushSweep();
 
     // 首次点击才起表
     if (this.startedAt === null) this.startedAt = this._now();
@@ -183,7 +193,7 @@ window.MemoryGame = (function () {
       self._timer = null;
       self.sequence = [];
       self.locked = false;
-      self._emit('sweep', self.snapshot());
+      self._emit('sweep', { instant: false, snapshot: self.snapshot() });
     }, self.options.peekMs);
 
     // 兜底：确保计时器不会因为页面隐藏而卡死状态（同时暴露给 UI 做归档）
@@ -192,6 +202,17 @@ window.MemoryGame = (function () {
       stagger: self.options.sweepMs,
       total: total
     };
+  };
+
+  /* 抢拍路径：立刻结束"错误展示期"，把进度清零并通知界面瞬时翻回 */
+  MemoryGame.prototype._flushSweep = function () {
+    if (this._timer) {
+      clearTimeout(this._timer);
+      this._timer = null;
+    }
+    this.sequence = [];
+    this.locked = false;
+    this._emit('sweep', { instant: true, snapshot: this.snapshot() });
   };
 
   /** 甩掉待执行的计时器（例如玩家中途重开） */

@@ -624,6 +624,12 @@
     game.on('flip', function (res) {
       var card = cards[res.index];
       if (!card) return;
+
+      // 玩家抢在展示结束前点了下一张：取消排队中的翻回动画，
+      // 并把状态上"已经不该翻开"的卡片立刻翻回，保证画面与游戏状态永远一致
+      clearSweepTimers();
+      settleClosedCards();
+
       card.classList.add('is-open');
       refreshCardA11y(card, res.index);
       sfx('flip');
@@ -663,9 +669,19 @@
       );
     });
 
-    game.on('sweep', function () {
+    game.on('sweep', function (res) {
+      var instant = !!(res && res.instant);
+
+      // 抢拍触发的翻回：不做错峰（要的就是"立刻"），也不刷新状态文案
+      //（紧接着的 flip / correct / wrong 会给出这一张的结果，避免文案闪一下）
+      if (instant) {
+        sweepBack(true);
+        renderProgress();
+        return;
+      }
+
       sfx('sweep');
-      sweepBack();
+      sweepBack(false);
       renderProgress();
       setStatus('全部翻回背面，重新从 <strong>1</strong> 开始。', true);
     });
@@ -718,10 +734,36 @@
       playfieldEl.classList.remove('is-shaking');
     }
 
-    function sweepBack() {
+    /* 以游戏状态为准，把"已经不该翻开"的卡片立刻翻回背面（无过渡等待）。
+       用于玩家抢拍时清掉上一张的画面，同时避免待执行的动画把刚点开的牌带回去 */
+    function settleClosedCards() {
+      for (var i = 0; i < cards.length; i++) {
+        var card = cards[i];
+        if (game.isOpenAt(i)) continue;
+        if (!card.classList.contains('is-open') &&
+            !card.classList.contains('is-wrong') &&
+            !card.classList.contains('is-done')) continue;
+
+        card.classList.remove('is-open', 'is-wrong', 'is-done');
+        card.style.zIndex = '';
+        refreshCardA11y(card, i);
+      }
+    }
+
+    function sweepBack(instant) {
       var opened = cards.filter(function (c) {
         return c.classList.contains('is-open');
       });
+
+      // 抢拍路径：一次性全部翻回，手感干脆
+      if (instant) {
+        opened.forEach(function (card) {
+          card.classList.remove('is-open', 'is-wrong', 'is-done');
+          card.style.zIndex = '';
+          refreshCardA11y(card, Number(card.dataset.index));
+        });
+        return;
+      }
 
       // 从最后翻开的往回收，视觉上像"倒带"
       opened.reverse();
@@ -729,6 +771,7 @@
       opened.forEach(function (card, i) {
         var t = setTimeout(function () {
           card.classList.remove('is-open', 'is-wrong', 'is-done');
+          card.style.zIndex = '';
           refreshCardA11y(card, Number(card.dataset.index));
         }, i * game.options.sweepMs);
         sweepTimers.push(t);
